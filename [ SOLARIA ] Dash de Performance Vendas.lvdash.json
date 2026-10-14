@@ -1,0 +1,1660 @@
+{
+  "datasets": [
+    {
+      "name": "d3020001",
+      "displayName": "Fornecedores disponíveis para este usuário",
+      "queryLines": [
+        "SELECT \n",
+        "  id\n",
+        "FROM workspace.core.company"
+      ]
+    },
+    {
+      "name": "d3020002",
+      "displayName": "Resumo do fornecedor",
+      "queryLines": [
+        "SELECT\n",
+        "  COALESCE((SELECT SUM(pi.negotiated_price * pi.quantity)\n",
+        "    FROM workspace.core.proposal p\n",
+        "    JOIN workspace.core.proposal_item pi ON pi.fk_proposal = p.id\n",
+        "    JOIN workspace.core.offer o ON o.id = pi.fk_offer\n",
+        "    JOIN workspace.core.supplier s ON s.id = o.fk_supplier\n",
+        "    WHERE s.id = :supplier_id AND EXISTS (\n",
+        "  SELECT 1\n",
+        "  FROM workspace.core.user_company uc\n",
+        "  JOIN workspace.core.person pe ON pe.fk_users = uc.fk_users\n",
+        "  JOIN workspace.core.contact ct ON ct.id = pe.fk_contact\n",
+        "  WHERE uc.fk_company = s.fk_company\n",
+        "    AND LOWER(ct.email) = LOWER(current_user())\n",
+        ") AND p.status = 'ACCEPTED'\n",
+        "      AND pi.negotiated_price IS NOT NULL\n",
+        "      AND DATE(p.created_at) BETWEEN :period.min AND :period.max), 0) AS accepted_negotiated_value,\n",
+        "  COALESCE((SELECT SUM(i.quantity)\n",
+        "    FROM workspace.core.inventory i\n",
+        "    JOIN workspace.core.supplier s ON s.id = i.fk_supplier\n",
+        "    WHERE s.id = :supplier_id AND EXISTS (\n",
+        "  SELECT 1\n",
+        "  FROM workspace.core.user_company uc\n",
+        "  JOIN workspace.core.person pe ON pe.fk_users = uc.fk_users\n",
+        "  JOIN workspace.core.contact ct ON ct.id = pe.fk_contact\n",
+        "  WHERE uc.fk_company = s.fk_company\n",
+        "    AND LOWER(ct.email) = LOWER(current_user())\n",
+        ")), 0) AS stock_units,\n",
+        "  (SELECT COUNT(*)\n",
+        "    FROM workspace.core.offer o\n",
+        "    JOIN workspace.core.supplier s ON s.id = o.fk_supplier\n",
+        "    WHERE s.id = :supplier_id AND EXISTS (\n",
+        "  SELECT 1\n",
+        "  FROM workspace.core.user_company uc\n",
+        "  JOIN workspace.core.person pe ON pe.fk_users = uc.fk_users\n",
+        "  JOIN workspace.core.contact ct ON ct.id = pe.fk_contact\n",
+        "  WHERE uc.fk_company = s.fk_company\n",
+        "    AND LOWER(ct.email) = LOWER(current_user())\n",
+        ")) AS registered_offers,\n",
+        "  (SELECT COUNT(DISTINCT p.id)\n",
+        "    FROM workspace.core.proposal p\n",
+        "    JOIN workspace.core.proposal_item pi ON pi.fk_proposal = p.id\n",
+        "    JOIN workspace.core.offer o ON o.id = pi.fk_offer\n",
+        "    JOIN workspace.core.supplier s ON s.id = o.fk_supplier\n",
+        "    WHERE s.id = :supplier_id AND EXISTS (\n",
+        "  SELECT 1\n",
+        "  FROM workspace.core.user_company uc\n",
+        "  JOIN workspace.core.person pe ON pe.fk_users = uc.fk_users\n",
+        "  JOIN workspace.core.contact ct ON ct.id = pe.fk_contact\n",
+        "  WHERE uc.fk_company = s.fk_company\n",
+        "    AND LOWER(ct.email) = LOWER(current_user())\n",
+        ") AND p.status = 'OPEN') AS open_proposals "
+      ],
+      "parameters": [
+        {
+          "displayName": "Período",
+          "keyword": "period",
+          "dataType": "DATE",
+          "complexType": "RANGE",
+          "defaultSelection": {
+            "range": {
+              "dataType": "DATE",
+              "min": {
+                "value": "now-12M/M"
+              },
+              "max": {
+                "value": "now/M"
+              }
+            }
+          }
+        },
+        {
+          "displayName": "Fornecedor",
+          "keyword": "supplier_id",
+          "dataType": "STRING",
+          "defaultSelection": {}
+        }
+      ]
+    },
+    {
+      "name": "d3020003",
+      "displayName": "Desempenho de produtos por mês",
+      "queryLines": [
+        "SELECT\n",
+        "  CAST(date_trunc('MONTH', p.created_at) AS DATE) AS month,\n",
+        "  CONCAT(m.brand, ' ', m.model) AS product,\n",
+        "  m.brand,\n",
+        "  m.model,\n",
+        "  SUM(pi.negotiated_price * pi.quantity) AS negotiated_value\n",
+        "FROM workspace.core.proposal_item pi\n",
+        "JOIN workspace.core.offer o ON o.id = pi.fk_offer\n",
+        "JOIN workspace.core.supplier s ON s.id = o.fk_supplier\n",
+        "JOIN workspace.core.model m ON m.id = o.fk_model\n",
+        "JOIN workspace.core.proposal p ON p.id = pi.fk_proposal\n",
+        "WHERE s.id = :supplier_id AND EXISTS (\n",
+        "  SELECT 1\n",
+        "  FROM workspace.core.user_company uc\n",
+        "  JOIN workspace.core.person pe ON pe.fk_users = uc.fk_users\n",
+        "  JOIN workspace.core.contact ct ON ct.id = pe.fk_contact\n",
+        "  WHERE uc.fk_company = s.fk_company\n",
+        "    AND LOWER(ct.email) = LOWER(current_user())\n",
+        ")\n",
+        "  AND p.status = 'ACCEPTED'\n",
+        "  AND pi.negotiated_price IS NOT NULL\n",
+        "  AND DATE(p.created_at) BETWEEN :period.min AND :period.max\n",
+        "GROUP BY CAST(date_trunc('MONTH', p.created_at) AS DATE), CONCAT(m.brand, ' ', m.model), m.brand, m.model\n",
+        "ORDER BY month"
+      ],
+      "parameters": [
+        {
+          "displayName": "Período",
+          "keyword": "period",
+          "dataType": "DATE",
+          "complexType": "RANGE",
+          "defaultSelection": {
+            "range": {
+              "dataType": "DATE",
+              "min": {
+                "value": "now-12M/M"
+              },
+              "max": {
+                "value": "now/M"
+              }
+            }
+          }
+        },
+        {
+          "displayName": "Fornecedor",
+          "keyword": "supplier_id",
+          "dataType": "STRING",
+          "defaultSelection": {}
+        }
+      ]
+    },
+    {
+      "name": "d3020004",
+      "displayName": "Propostas recebidas",
+      "queryLines": [
+        "SELECT p.id AS proposal_id, p.status, p.created_at,\n",
+        "  COALESCE(SUM(pi.negotiated_price * pi.quantity), 0) AS negotiated_value\n",
+        "FROM workspace.core.proposal p\n",
+        "JOIN workspace.core.proposal_item pi ON pi.fk_proposal = p.id\n",
+        "JOIN workspace.core.offer o ON o.id = pi.fk_offer\n",
+        "JOIN workspace.core.supplier s ON s.id = o.fk_supplier\n",
+        "WHERE s.id = :supplier_id AND EXISTS (\n",
+        "  SELECT 1\n",
+        "  FROM workspace.core.user_company uc\n",
+        "  JOIN workspace.core.person pe ON pe.fk_users = uc.fk_users\n",
+        "  JOIN workspace.core.contact ct ON ct.id = pe.fk_contact\n",
+        "  WHERE uc.fk_company = s.fk_company\n",
+        "    AND LOWER(ct.email) = LOWER(current_user())\n",
+        ")\n",
+        "  AND DATE(p.created_at) BETWEEN :period.min AND :period.max\n",
+        "GROUP BY p.id, p.status, p.created_at\n",
+        "ORDER BY p.created_at DESC"
+      ],
+      "parameters": [
+        {
+          "displayName": "Período",
+          "keyword": "period",
+          "dataType": "DATE",
+          "complexType": "RANGE",
+          "defaultSelection": {
+            "range": {
+              "dataType": "DATE",
+              "min": {
+                "value": "now-12M/M"
+              },
+              "max": {
+                "value": "now/M"
+              }
+            }
+          }
+        },
+        {
+          "displayName": "Fornecedor",
+          "keyword": "supplier_id",
+          "dataType": "STRING",
+          "defaultSelection": {}
+        }
+      ]
+    },
+    {
+      "name": "d3020005",
+      "displayName": "Propostas recebidas por status",
+      "queryLines": [
+        "SELECT p.status, COUNT(DISTINCT p.id) AS proposal_count\n",
+        "FROM workspace.core.proposal p\n",
+        "JOIN workspace.core.proposal_item pi ON pi.fk_proposal = p.id\n",
+        "JOIN workspace.core.offer o ON o.id = pi.fk_offer\n",
+        "JOIN workspace.core.supplier s ON s.id = o.fk_supplier\n",
+        "WHERE s.id = :supplier_id AND EXISTS (\n",
+        "  SELECT 1\n",
+        "  FROM workspace.core.user_company uc\n",
+        "  JOIN workspace.core.person pe ON pe.fk_users = uc.fk_users\n",
+        "  JOIN workspace.core.contact ct ON ct.id = pe.fk_contact\n",
+        "  WHERE uc.fk_company = s.fk_company\n",
+        "    AND LOWER(ct.email) = LOWER(current_user())\n",
+        ")\n",
+        "  AND DATE(p.created_at) BETWEEN :period.min AND :period.max\n",
+        "GROUP BY p.status\n",
+        "ORDER BY proposal_count DESC"
+      ],
+      "parameters": [
+        {
+          "displayName": "Período",
+          "keyword": "period",
+          "dataType": "DATE",
+          "complexType": "RANGE",
+          "defaultSelection": {
+            "range": {
+              "dataType": "DATE",
+              "min": {
+                "value": "now-12M/M"
+              },
+              "max": {
+                "value": "now/M"
+              }
+            }
+          }
+        },
+        {
+          "displayName": "Fornecedor",
+          "keyword": "supplier_id",
+          "dataType": "STRING",
+          "defaultSelection": {}
+        }
+      ]
+    },
+    {
+      "name": "d3020006",
+      "displayName": "Ofertas do fornecedor",
+      "queryLines": [
+        "SELECT\n",
+        "  o.id AS offer_id,\n",
+        "  CONCAT(m.brand, ' ', m.model) AS product,\n",
+        "  m.brand,\n",
+        "  m.model,\n",
+        "  o.unit_price,\n",
+        "  o.availability,\n",
+        "  COALESCE(i.quantity, 0) AS stock_quantity,\n",
+        "  o.expiration_date,\n",
+        "  m.status AS model_status,\n",
+        "  CASE\n",
+        "    WHEN o.expiration_date IS NULL THEN 'SEM VALIDADE'\n",
+        "    WHEN o.expiration_date < CURRENT_DATE() THEN 'EXPIRADA'\n",
+        "    WHEN o.expiration_date <= DATE_ADD(CURRENT_DATE(), 30) THEN 'VENCE EM 30 DIAS'\n",
+        "    ELSE 'VÁLIDA'\n",
+        "  END AS validity_status\n",
+        "FROM\n",
+        "  workspace.core.offer o\n",
+        "    JOIN workspace.core.supplier s\n",
+        "      ON s.id = o.fk_supplier\n",
+        "    JOIN workspace.core.model m\n",
+        "      ON m.id = o.fk_model\n",
+        "    LEFT JOIN workspace.core.inventory i\n",
+        "      ON i.fk_supplier = s.id\n",
+        "      AND i.fk_model = m.id\n",
+        "WHERE\n",
+        "  s.id = :supplier_id\n",
+        "  AND EXISTS (\n",
+        "    SELECT\n",
+        "      1\n",
+        "    FROM\n",
+        "      workspace.core.user_company uc\n",
+        "        JOIN workspace.core.person pe\n",
+        "          ON pe.fk_users = uc.fk_users\n",
+        "        JOIN workspace.core.contact ct\n",
+        "          ON ct.id = pe.fk_contact\n",
+        "    WHERE\n",
+        "      uc.fk_company = s.fk_company\n",
+        "      AND LOWER(ct.email) = LOWER(current_user())\n",
+        "  )\n",
+        "ORDER BY\n",
+        "  o.expiration_date,\n",
+        "  m.brand,\n",
+        "  m.model"
+      ],
+      "parameters": [
+        {
+          "displayName": "Fornecedor",
+          "keyword": "supplier_id",
+          "dataType": "STRING",
+          "defaultSelection": {}
+        }
+      ]
+    },
+    {
+      "name": "d3020007",
+      "displayName": "Estoque por produto",
+      "queryLines": [
+        "SELECT\n",
+        "  CONCAT(m.brand, ' ', m.model) AS product,\n",
+        "  m.brand,\n",
+        "  m.model,\n",
+        "  SUM(i.quantity) AS stock_quantity\n",
+        "FROM\n",
+        "  workspace.core.inventory i\n",
+        "    JOIN workspace.core.supplier s\n",
+        "      ON s.id = i.fk_supplier\n",
+        "    JOIN workspace.core.model m\n",
+        "      ON m.id = i.fk_model\n",
+        "WHERE\n",
+        "  s.id = :supplier_id\n",
+        "  AND EXISTS (\n",
+        "    SELECT\n",
+        "      1\n",
+        "    FROM\n",
+        "      workspace.core.user_company uc\n",
+        "        JOIN workspace.core.person pe\n",
+        "          ON pe.fk_users = uc.fk_users\n",
+        "        JOIN workspace.core.contact ct\n",
+        "          ON ct.id = pe.fk_contact\n",
+        "    WHERE\n",
+        "      uc.fk_company = s.fk_company\n",
+        "      AND LOWER(ct.email) = LOWER(current_user())\n",
+        "  )\n",
+        "GROUP BY\n",
+        "  CONCAT(m.brand, ' ', m.model),\n",
+        "  m.brand,\n",
+        "  m.model\n",
+        "ORDER BY\n",
+        "  stock_quantity DESC"
+      ],
+      "parameters": [
+        {
+          "displayName": "Fornecedor",
+          "keyword": "supplier_id",
+          "dataType": "STRING",
+          "defaultSelection": {}
+        }
+      ]
+    },
+    {
+      "name": "d3020008",
+      "displayName": "Ofertas expiradas ou sem proposta aceita no período",
+      "queryLines": [
+        "SELECT o.id AS offer_id,\n",
+        "  CONCAT(m.brand, ' ', m.model) AS product, m.brand, m.model,\n",
+        "  o.availability, o.expiration_date,\n",
+        "  CASE\n",
+        "    WHEN o.expiration_date IS NOT NULL AND o.expiration_date < CURRENT_DATE() THEN 'EXPIRADA'\n",
+        "    ELSE 'SEM PROPOSTA ACEITA NO PERÍODO'\n",
+        "  END AS reason\n",
+        "FROM workspace.core.offer o\n",
+        "JOIN workspace.core.supplier s ON s.id = o.fk_supplier\n",
+        "JOIN workspace.core.model m ON m.id = o.fk_model\n",
+        "WHERE s.id = :supplier_id AND EXISTS (\n",
+        "  SELECT 1\n",
+        "  FROM workspace.core.user_company uc\n",
+        "  JOIN workspace.core.person pe ON pe.fk_users = uc.fk_users\n",
+        "  JOIN workspace.core.contact ct ON ct.id = pe.fk_contact\n",
+        "  WHERE uc.fk_company = s.fk_company\n",
+        "    AND LOWER(ct.email) = LOWER(current_user())\n",
+        ")\n",
+        "  AND (\n",
+        "    (o.expiration_date IS NOT NULL AND o.expiration_date < CURRENT_DATE())\n",
+        "    OR NOT EXISTS (\n",
+        "      SELECT 1\n",
+        "      FROM workspace.core.proposal_item pi\n",
+        "      JOIN workspace.core.proposal p ON p.id = pi.fk_proposal\n",
+        "      WHERE pi.fk_offer = o.id\n",
+        "        AND p.status = 'ACCEPTED'\n",
+        "        AND DATE(p.created_at) BETWEEN :period.min AND :period.max\n",
+        "    )\n",
+        "  )\n",
+        "ORDER BY o.expiration_date, m.brand, m.model"
+      ],
+      "parameters": [
+        {
+          "displayName": "Período",
+          "keyword": "period",
+          "dataType": "DATE",
+          "complexType": "RANGE",
+          "defaultSelection": {
+            "range": {
+              "dataType": "DATE",
+              "min": {
+                "value": "now-12M/M"
+              },
+              "max": {
+                "value": "now/M"
+              }
+            }
+          }
+        },
+        {
+          "displayName": "Fornecedor",
+          "keyword": "supplier_id",
+          "dataType": "STRING",
+          "defaultSelection": {}
+        }
+      ]
+    },
+    {
+      "name": "3d258743",
+      "displayName": "Active Supplier Directory Linked to Current User",
+      "queryLines": [
+        "select * from workspace.core.company"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "e3020001",
+      "displayName": "Meu Negócio",
+      "layout": [
+        {
+          "widget": {
+            "name": "e3020001",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<span style=\"font-size:24px;\">Solaria | Meu Negócio</span><br><span style=\"font-size:13px;\">Desempenho de produtos, estoque, ofertas e propostas recebidas.</span>"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "e3020002",
+            "queries": [
+              {
+                "name": "dashboards/01f1be6dcfcc144e8371090df32a0f33/datasets/01f1be6dcfcd130c8fe2042fef4a0b04_id",
+                "query": {
+                  "datasetName": "d3020001",
+                  "fields": [
+                    {
+                      "name": "id",
+                      "expression": "`id`"
+                    },
+                    {
+                      "name": "id_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "parameter_dashboards/01f1be6dcfcc144e8371090df32a0f33/datasets/01f1be6dcfcd131497c30a0ea975dc30_supplier_id",
+                "query": {
+                  "datasetName": "d3020002",
+                  "parameters": [
+                    {
+                      "name": "supplier_id",
+                      "keyword": "supplier_id"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "parameter_dashboards/01f1be6dcfcc144e8371090df32a0f33/datasets/01f1be6dcfcd1316b2e80f692d84c6b9_supplier_id",
+                "query": {
+                  "datasetName": "d3020003",
+                  "parameters": [
+                    {
+                      "name": "supplier_id",
+                      "keyword": "supplier_id"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "parameter_dashboards/01f1be6dcfcc144e8371090df32a0f33/datasets/01f1be6dcfcd1316ae5b7031dafb3525_supplier_id",
+                "query": {
+                  "datasetName": "d3020004",
+                  "parameters": [
+                    {
+                      "name": "supplier_id",
+                      "keyword": "supplier_id"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "parameter_dashboards/01f1be6dcfcc144e8371090df32a0f33/datasets/01f1be6dcfcd131791eb64f3b00d5cd5_supplier_id",
+                "query": {
+                  "datasetName": "d3020005",
+                  "parameters": [
+                    {
+                      "name": "supplier_id",
+                      "keyword": "supplier_id"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "parameter_dashboards/01f1be6dcfcc144e8371090df32a0f33/datasets/01f1be6dcfcd1317ba110a29dfa9a8d2_supplier_id",
+                "query": {
+                  "datasetName": "d3020006",
+                  "parameters": [
+                    {
+                      "name": "supplier_id",
+                      "keyword": "supplier_id"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "parameter_dashboards/01f1be6dcfcc144e8371090df32a0f33/datasets/01f1be6dcfcd1318894b4402cb3ade86_supplier_id",
+                "query": {
+                  "datasetName": "d3020007",
+                  "parameters": [
+                    {
+                      "name": "supplier_id",
+                      "keyword": "supplier_id"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "parameter_dashboards/01f1be6dcfcc144e8371090df32a0f33/datasets/01f1be6dcfcd13199cdc678b359db996_supplier_id",
+                "query": {
+                  "datasetName": "d3020008",
+                  "parameters": [
+                    {
+                      "name": "supplier_id",
+                      "keyword": "supplier_id"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Fornecedor autorizado",
+                  "fields": []
+                }
+              },
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "id",
+                    "queryName": "dashboards/01f1be6dcfcc144e8371090df32a0f33/datasets/01f1be6dcfcd130c8fe2042fef4a0b04_id"
+                  },
+                  {
+                    "parameterName": "supplier_id",
+                    "queryName": "parameter_dashboards/01f1be6dcfcc144e8371090df32a0f33/datasets/01f1be6dcfcd131497c30a0ea975dc30_supplier_id"
+                  },
+                  {
+                    "parameterName": "supplier_id",
+                    "queryName": "parameter_dashboards/01f1be6dcfcc144e8371090df32a0f33/datasets/01f1be6dcfcd1316b2e80f692d84c6b9_supplier_id"
+                  },
+                  {
+                    "parameterName": "supplier_id",
+                    "queryName": "parameter_dashboards/01f1be6dcfcc144e8371090df32a0f33/datasets/01f1be6dcfcd1316ae5b7031dafb3525_supplier_id"
+                  },
+                  {
+                    "parameterName": "supplier_id",
+                    "queryName": "parameter_dashboards/01f1be6dcfcc144e8371090df32a0f33/datasets/01f1be6dcfcd131791eb64f3b00d5cd5_supplier_id"
+                  },
+                  {
+                    "parameterName": "supplier_id",
+                    "queryName": "parameter_dashboards/01f1be6dcfcc144e8371090df32a0f33/datasets/01f1be6dcfcd1317ba110a29dfa9a8d2_supplier_id"
+                  },
+                  {
+                    "parameterName": "supplier_id",
+                    "queryName": "parameter_dashboards/01f1be6dcfcc144e8371090df32a0f33/datasets/01f1be6dcfcd1318894b4402cb3ade86_supplier_id"
+                  },
+                  {
+                    "parameterName": "supplier_id",
+                    "queryName": "parameter_dashboards/01f1be6dcfcc144e8371090df32a0f33/datasets/01f1be6dcfcd13199cdc678b359db996_supplier_id"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 4,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "e3020003",
+            "queries": [
+              {
+                "name": "period_kpi",
+                "query": {
+                  "datasetName": "d3020002",
+                  "parameters": [
+                    {
+                      "name": "period",
+                      "keyword": "period"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "period_sales",
+                "query": {
+                  "datasetName": "d3020003",
+                  "parameters": [
+                    {
+                      "name": "period",
+                      "keyword": "period"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "period_proposals",
+                "query": {
+                  "datasetName": "d3020004",
+                  "parameters": [
+                    {
+                      "name": "period",
+                      "keyword": "period"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "period_status",
+                "query": {
+                  "datasetName": "d3020005",
+                  "parameters": [
+                    {
+                      "name": "period",
+                      "keyword": "period"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "period_stale",
+                "query": {
+                  "datasetName": "d3020008",
+                  "parameters": [
+                    {
+                      "name": "period",
+                      "keyword": "period"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-date-range-picker",
+              "encodings": {
+                "fields": [
+                  {
+                    "parameterName": "period",
+                    "queryName": "period_kpi"
+                  },
+                  {
+                    "parameterName": "period",
+                    "queryName": "period_sales"
+                  },
+                  {
+                    "parameterName": "period",
+                    "queryName": "period_proposals"
+                  },
+                  {
+                    "parameterName": "period",
+                    "queryName": "period_status"
+                  },
+                  {
+                    "parameterName": "period",
+                    "queryName": "period_stale"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Período de propostas"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 2,
+            "width": 4,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "e3020004",
+            "queries": [
+              {
+                "name": "proposal_status",
+                "query": {
+                  "datasetName": "d3020004",
+                  "fields": [
+                    {
+                      "name": "status",
+                      "expression": "`status`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "proposal_status_counts",
+                "query": {
+                  "datasetName": "d3020005",
+                  "fields": [
+                    {
+                      "name": "status",
+                      "expression": "`status`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "status",
+                    "displayName": "Status da proposta",
+                    "queryName": "proposal_status"
+                  },
+                  {
+                    "fieldName": "status",
+                    "displayName": "Status da proposta",
+                    "queryName": "proposal_status_counts"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Status da proposta"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 2,
+            "width": 4,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "e3020005",
+            "queries": [
+              {
+                "name": "sales_brand",
+                "query": {
+                  "datasetName": "d3020003",
+                  "fields": [
+                    {
+                      "name": "brand",
+                      "expression": "`brand`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "offers_brand",
+                "query": {
+                  "datasetName": "d3020006",
+                  "fields": [
+                    {
+                      "name": "brand",
+                      "expression": "`brand`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "stock_brand",
+                "query": {
+                  "datasetName": "d3020007",
+                  "fields": [
+                    {
+                      "name": "brand",
+                      "expression": "`brand`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "stale_brand",
+                "query": {
+                  "datasetName": "d3020008",
+                  "fields": [
+                    {
+                      "name": "brand",
+                      "expression": "`brand`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "brand",
+                    "displayName": "Marca",
+                    "queryName": "sales_brand"
+                  },
+                  {
+                    "fieldName": "brand",
+                    "displayName": "Marca",
+                    "queryName": "offers_brand"
+                  },
+                  {
+                    "fieldName": "brand",
+                    "displayName": "Marca",
+                    "queryName": "stock_brand"
+                  },
+                  {
+                    "fieldName": "brand",
+                    "displayName": "Marca",
+                    "queryName": "stale_brand"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Marca"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 3,
+            "width": 4,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "e3020006",
+            "queries": [
+              {
+                "name": "sales_model",
+                "query": {
+                  "datasetName": "d3020003",
+                  "fields": [
+                    {
+                      "name": "model",
+                      "expression": "`model`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "offers_model",
+                "query": {
+                  "datasetName": "d3020006",
+                  "fields": [
+                    {
+                      "name": "model",
+                      "expression": "`model`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "stock_model",
+                "query": {
+                  "datasetName": "d3020007",
+                  "fields": [
+                    {
+                      "name": "model",
+                      "expression": "`model`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "stale_model",
+                "query": {
+                  "datasetName": "d3020008",
+                  "fields": [
+                    {
+                      "name": "model",
+                      "expression": "`model`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "model",
+                    "displayName": "Modelo",
+                    "queryName": "sales_model"
+                  },
+                  {
+                    "fieldName": "model",
+                    "displayName": "Modelo",
+                    "queryName": "offers_model"
+                  },
+                  {
+                    "fieldName": "model",
+                    "displayName": "Modelo",
+                    "queryName": "stock_model"
+                  },
+                  {
+                    "fieldName": "model",
+                    "displayName": "Modelo",
+                    "queryName": "stale_model"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Modelo"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 3,
+            "width": 4,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "e3020007",
+            "queries": [
+              {
+                "name": "offers_validity",
+                "query": {
+                  "datasetName": "d3020006",
+                  "fields": [
+                    {
+                      "name": "validity_status",
+                      "expression": "`validity_status`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "stale_validity",
+                "query": {
+                  "datasetName": "d3020008",
+                  "fields": [
+                    {
+                      "name": "validity_status",
+                      "expression": "`validity_status`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "validity_status",
+                    "displayName": "Validade da oferta",
+                    "queryName": "offers_validity"
+                  },
+                  {
+                    "fieldName": "validity_status",
+                    "displayName": "Validade da oferta",
+                    "queryName": "stale_validity"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Validade da oferta"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 3,
+            "width": 4,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "e3020008",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "d3020002",
+                  "fields": [
+                    {
+                      "name": "accepted_negotiated_value",
+                      "expression": "`accepted_negotiated_value`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              },
+              {
+                "name": "stale_validity",
+                "query": {
+                  "datasetName": "d3020008",
+                  "fields": [
+                    {
+                      "name": "validity_status",
+                      "expression": "`validity_status`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "accepted_negotiated_value",
+                  "displayName": "Valor negociado aceito no período"
+                }
+              },
+              "frame": {
+                "title": "Valor negociado aceito no período",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "e3020009",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "d3020002",
+                  "fields": [
+                    {
+                      "name": "stock_units",
+                      "expression": "`stock_units`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "stock_units",
+                  "displayName": "Unidades em estoque"
+                }
+              },
+              "frame": {
+                "title": "Unidades em estoque",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 4,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "e3020010",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "d3020002",
+                  "fields": [
+                    {
+                      "name": "registered_offers",
+                      "expression": "`registered_offers`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "registered_offers",
+                  "displayName": "Ofertas cadastradas"
+                }
+              },
+              "frame": {
+                "title": "Ofertas cadastradas",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 4,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "e3020011",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "d3020002",
+                  "fields": [
+                    {
+                      "name": "open_proposals",
+                      "expression": "`open_proposals`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "open_proposals",
+                  "displayName": "Propostas abertas recebidas"
+                }
+              },
+              "frame": {
+                "title": "Propostas abertas recebidas",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 4,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "e3020012",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "d3020003",
+                  "fields": [
+                    {
+                      "name": "month",
+                      "expression": "`month`"
+                    },
+                    {
+                      "name": "negotiated_value",
+                      "expression": "`negotiated_value`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "month",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "displayName": "Mês de criação"
+                },
+                "y": {
+                  "fieldName": "negotiated_value",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Valor negociado (R$)"
+                }
+              },
+              "frame": {
+                "title": "Evolução mensal do valor negociado aceito",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 6,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "e3020013",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "d3020003",
+                  "fields": [
+                    {
+                      "name": "product",
+                      "expression": "`product`"
+                    },
+                    {
+                      "name": "negotiated_value",
+                      "expression": "`negotiated_value`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "product",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "Produto"
+                },
+                "y": {
+                  "fieldName": "negotiated_value",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Valor negociado (R$)"
+                }
+              },
+              "frame": {
+                "title": "Valor negociado por produto",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 6,
+            "width": 6,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "e3020014",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "d3020005",
+                  "fields": [
+                    {
+                      "name": "status",
+                      "expression": "`status`"
+                    },
+                    {
+                      "name": "proposal_count",
+                      "expression": "`proposal_count`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "status",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "Status"
+                },
+                "y": {
+                  "fieldName": "proposal_count",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Quantidade de propostas"
+                }
+              },
+              "frame": {
+                "title": "Propostas recebidas por status",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 11,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "e3020015",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "d3020007",
+                  "fields": [
+                    {
+                      "name": "product",
+                      "expression": "`product`"
+                    },
+                    {
+                      "name": "stock_quantity",
+                      "expression": "`stock_quantity`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "product",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "Produto"
+                },
+                "y": {
+                  "fieldName": "stock_quantity",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Unidades em estoque"
+                }
+              },
+              "frame": {
+                "title": "Estoque por produto",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 11,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "e3020016",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "d3020006",
+                  "fields": [
+                    {
+                      "name": "product",
+                      "expression": "`product`"
+                    },
+                    {
+                      "name": "unit_price",
+                      "expression": "`unit_price`"
+                    },
+                    {
+                      "name": "availability",
+                      "expression": "`availability`"
+                    },
+                    {
+                      "name": "stock_quantity",
+                      "expression": "`stock_quantity`"
+                    },
+                    {
+                      "name": "expiration_date",
+                      "expression": "`expiration_date`"
+                    },
+                    {
+                      "name": "validity_status",
+                      "expression": "`validity_status`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "product",
+                    "displayName": "Produto",
+                    "visible": true
+                  },
+                  {
+                    "fieldName": "unit_price",
+                    "displayName": "Preço unitário (R$)",
+                    "visible": true
+                  },
+                  {
+                    "fieldName": "availability",
+                    "displayName": "Disponibilidade",
+                    "visible": true
+                  },
+                  {
+                    "fieldName": "stock_quantity",
+                    "displayName": "Estoque",
+                    "visible": true
+                  },
+                  {
+                    "fieldName": "expiration_date",
+                    "displayName": "Validade",
+                    "visible": true
+                  },
+                  {
+                    "fieldName": "validity_status",
+                    "displayName": "Situação",
+                    "visible": true
+                  }
+                ]
+              },
+              "frame": {
+                "title": "Ofertas cadastradas",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 17,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "e3020017",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "d3020008",
+                  "fields": [
+                    {
+                      "name": "product",
+                      "expression": "`product`"
+                    },
+                    {
+                      "name": "availability",
+                      "expression": "`availability`"
+                    },
+                    {
+                      "name": "expiration_date",
+                      "expression": "`expiration_date`"
+                    },
+                    {
+                      "name": "reason",
+                      "expression": "`reason`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "product",
+                    "displayName": "Produto",
+                    "visible": true
+                  },
+                  {
+                    "fieldName": "availability",
+                    "displayName": "Disponibilidade",
+                    "visible": true
+                  },
+                  {
+                    "fieldName": "expiration_date",
+                    "displayName": "Validade",
+                    "visible": true
+                  },
+                  {
+                    "fieldName": "reason",
+                    "displayName": "Motivo",
+                    "visible": true
+                  }
+                ]
+              },
+              "frame": {
+                "title": "Ofertas expiradas ou sem proposta aceita no período",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 17,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "e3020018",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "d3020004",
+                  "fields": [
+                    {
+                      "name": "proposal_id",
+                      "expression": "`proposal_id`"
+                    },
+                    {
+                      "name": "status",
+                      "expression": "`status`"
+                    },
+                    {
+                      "name": "created_at",
+                      "expression": "`created_at`"
+                    },
+                    {
+                      "name": "negotiated_value",
+                      "expression": "`negotiated_value`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "proposal_id",
+                    "displayName": "Proposta",
+                    "visible": true
+                  },
+                  {
+                    "fieldName": "status",
+                    "displayName": "Status",
+                    "visible": true
+                  },
+                  {
+                    "fieldName": "created_at",
+                    "displayName": "Data de criação",
+                    "visible": true
+                  },
+                  {
+                    "fieldName": "negotiated_value",
+                    "displayName": "Valor informado (R$)",
+                    "visible": true
+                  }
+                ]
+              },
+              "frame": {
+                "title": "Propostas recebidas no período",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 24,
+            "width": 12,
+            "height": 8
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
