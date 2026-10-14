@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.0](https://github.com/Solierrr/databricks-stocker/compare/v0.2.0...v0.3.0) (2026-10-14)
+
+
+### Features
+
+* Subindo as Pipelines ([b83bc2b](https://github.com/Solierrr/databricks-stocker/commit/b83bc2bba6f604b112717659e6d6d2a0079f23be))
+* Subindo o Dash de Fornecedores ([7c551b5](https://github.com/Solierrr/databricks-stocker/commit/7c551b5ed710dd8c03a1c3d27f628b81a78f5452))
+* Subndo o dash de PErformace de ADMIN ([bec19f5](https://github.com/Solierrr/databricks-stocker/commit/bec19f5d98d1553438b034d1a888db0731343fc6))
+
+
+### Bug Fixes
+
+* Removendo  o trecho com text eol=crlf para configuração do databricks ([b75319b](https://github.com/Solierrr/databricks-stocker/commit/b75319b395fbcc822985c9333cc9d3c06813c133))
+
 ## [0.2.0](https://github.com/Solierrr/generic-template/compare/v0.1.1...v0.2.0) (2026-10-02)
 
 
