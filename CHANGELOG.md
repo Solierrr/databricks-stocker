@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.4.0](https://github.com/Solierrr/databricks-stocker/compare/v0.3.0...v0.4.0) (2026-10-15)
+
+
+### Features
+
+* add medallion architecture foundation ([#5](https://github.com/Solierrr/databricks-stocker/issues/5)) ([2b10b3b](https://github.com/Solierrr/databricks-stocker/commit/2b10b3ba8b6279031d839d80d32f78be5d5f238e))
+
+
+### Bug Fixes
+
+* remove incompatible EOL .gitattributes configuration ([d7cb426](https://github.com/Solierrr/databricks-stocker/commit/d7cb4260a25b326ca499029ea2e986e3cf0fe686))
+* remove incompatible EOL .gitattributes configuration ([0901826](https://github.com/Solierrr/databricks-stocker/commit/090182664e7de3e5480a36900c90d68bbcaf9413))
+
 ## [0.3.0](https://github.com/Solierrr/databricks-stocker/compare/v0.2.0...v0.3.0) (2026-10-14)
 
 
