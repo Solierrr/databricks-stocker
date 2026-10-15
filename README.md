@@ -1,26 +1,14 @@
-# Finalidade do repositório
+# Databricks Stocker
 
-Este repositório é o ponto de partida para novos serviços da Solaria. Ao criar um projeto a partir deste template, substitua os textos de exemplo, preencha as configurações da aplicação e mantenha a documentação alinhada ao que o serviço realmente oferece. Use `ARCHITECTURE.md` para registrar a organização do código, `RUNNING.md` para explicar como executar a aplicação e `DEPLOYMENT.md` para descrever seu deploy. O diretório `http/` reúne requisições de exemplo para chamar a API localmente durante o desenvolvimento.
+Workspace analítico da Solaria responsável pelas camadas Silver e Gold. A ingestão do CoreDB para a Bronze pertence ao serviço databricks-sync.
 
-## Estrutura inicial
+## Estrutura
 
-- `http/README.md`: convenções do cliente HTTP local.
-- `http/bruno.json`: manifesto da coleção Bruno.
-- `http/environments/local.bru`: ambiente local da API, com credenciais vazias.
-- `http/`: requisições `.bru` agrupadas em diretórios em inglês (`health/`, `authentication/`, `tasks/`).
-- `.dockerignore`: exclui segredos e arquivos locais do contexto de build da imagem.
-- `entrypoint.sh`: busca configuração no Infisical em runtime quando Universal Auth está configurado; sem essas credenciais, inicia diretamente o comando da imagem.
-- `.env.example`: nomes e valores de exemplo das variáveis necessárias; não inclua credenciais reais.
-- `Dockerfile`: ponto de partida para empacotar a aplicação.
+- pipelines/01_silver/: transformação da Bronze em dados tratados.
+- pipelines/02_gold/: indicadores destinados aos dashboards e ao front.
+- exports/: exportação futura da Gold para o AnalyticsDB.
+- dashboards/: dashboards reais exportados do Databricks quando forem criados.
+- docs/: arquitetura, regras da Silver e configuração manual no Databricks.
+- archive/: notebooks e dashboards anteriores, preservados como referência.
 
-## Cliente HTTP local
-
-Abra `http/` como uma coleção Bruno e edite os arquivos `.bru` para incluir as rotas reais do serviço. Consulte [`http/README.md`](./http/README.md) para instruções e o template canônico em [`docs-warehouse/templates/http/`](https://github.com/Solierrr/docs-warehouse/tree/main/templates/http).
-
-Antes de disponibilizar o repositório, substitua as descrições de exemplo e revise os links e comandos para refletir a stack escolhida.
-
-## Inicialização da imagem no Render
-
-O `entrypoint.sh` recebe o comando da aplicação definido no `CMD` do `Dockerfile`. Se `INFISICAL_CLIENT_ID` e `INFISICAL_CLIENT_SECRET` estiverem presentes em runtime, ele autentica via Universal Auth e inicia esse comando sob `infisical run`; caso contrário, executa-o diretamente com as variáveis já injetadas pela plataforma. O projeto padrão é o workspace Solaria e o ambiente padrão é `qa`; ambos podem ser substituídos por `INFISICAL_PROJECT_ID` e `INFISICAL_ENV`.
-
-Para ativar o caminho Infisical, instale o CLI na imagem runtime e configure as credenciais como variáveis de runtime do Render, nunca como argumentos ou variáveis de build. Quando o Render já fornecer os segredos diretamente, não configure as credenciais Universal Auth e o launcher apenas inicia a aplicação. Use um launcher específico quando o serviço precisar preparar arquivos ou fazer outra transformação antes de iniciar.
+Os arquivos novos estão vazios e ainda não representam recursos executáveis.
