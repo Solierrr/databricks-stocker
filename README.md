@@ -1,15 +1,50 @@
-# databricks-stocker
+# Databricks Stocker
 
-Repositório de versionamento do que é construído no Databricks da Solaria: dashboards, pipelines e notebooks. Funciona como uma Git folder do workspace, para que o trabalho feito no Databricks passe por revisão e histórico como qualquer outro código da organização.
+Workspace analítico da Solaria responsável por transformar os dados da camada Bronze nas camadas Silver e Gold. A ingestão do CoreDB para a Bronze pertence ao serviço `databricks-sync`.
+
+## Fluxo de dados
+
+```text
+CoreDB
+  |
+  v
+databricks-sync
+  |
+  v
+Bronze
+  |
+  v
+Pipeline Silver
+  |
+  v
+Silver
+  |
+  v
+Pipeline Gold
+  |
+  v
+Gold
+  |-- Dashboards do Databricks
+  +-- Exportação futura para o AnalyticsDB
+```
 
 ## Estrutura
 
-- `dashboards/`: dashboards do Lakeview exportados como `.lvdash.json` (desempenho de vendas e indicadores administrativos).
-- `pipelines/`: notebooks dos pipelines de BI que transformam as camadas do lake e alimentam os indicadores (catálogo, consumo energético, conversão de propostas, financeiro, serviço técnico e usuários).
-- `docs/`: documentação do repositório.
+- `pipelines/01_silver/`: transformações da Bronze em dados limpos e padronizados.
+- `pipelines/02_gold/`: indicadores preparados a partir da Silver.
+- `exports/`: notebook reservado para a futura exportação da Gold para o AnalyticsDB.
+- `dashboards/`: local destinado aos dashboards exportados do Databricks.
+- `docs/architecture.md`: descrição do fluxo entre os serviços e medalhões.
+- `docs/silver-rules.md`: responsabilidades planejadas para cada transformação Silver.
+- `archive/legacy_notebooks/`: notebooks anteriores preservados como referência.
+- `archive/legacy_dashboards/`: dashboards anteriores preservados como referência.
 
-## Relação com o databricks-sync
+## Arquivos auxiliares
 
-O `databricks-sync` leva os dados dos bancos (`coredb`, no Postgres) para a camada bronze do Databricks e devolve os resultados da camada gold para o banco de analytics, de onde o front carrega os KPIs. Este repositório guarda o que roda dentro do Databricks; o `databricks-sync` guarda a API que move os dados entre os bancos e o lake.
+- `entrypoint.sh`: executa um comando recebido e, quando configurado, carrega variáveis pelo Infisical.
+- `Dockerfile`: modelo ainda não configurado para gerar uma imagem executável.
+- `.env.example`: arquivo atualmente vazio, reservado para documentar futuras variáveis de ambiente.
 
-Este repositório não é um serviço: não tem imagem, API nem deploy automático.
+## Estado atual
+
+A estrutura das camadas Silver e Gold está preparada, mas os novos arquivos SQL e notebooks ainda estão vazios. Nenhuma transformação, exportação ou pipeline é executada automaticamente pelo conteúdo atual do repositório.
