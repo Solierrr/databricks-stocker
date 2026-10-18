@@ -1,7 +1,7 @@
 {
   "id": "5f658ca5-9ba0-44de-9ccc-765e43cd1363",
   "pipeline_type": "WORKSPACE",
-  "name": "solaria-gold-pipeline",
+  "name": "gold-pipeline",
   "libraries": [
     {
       "glob": {
