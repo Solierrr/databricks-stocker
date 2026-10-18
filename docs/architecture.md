@@ -1,17 +1,9 @@
 # Arquitetura de medalhões
 
-## Fluxo
+O `databricks-sync` é responsável pela ingestão CoreDB → Bronze. Neste primeiro ciclo, a Bronze foi preenchida manualmente com um snapshot QA para validar as transformações; a ingestão contínua ainda não foi comprovada.
 
-1. O databricks-sync copia os dados do CoreDB para a Bronze.
-2. A Pipeline Silver do databricks-stocker limpa e padroniza os dados.
-3. A Pipeline Gold calcula indicadores a partir da Silver.
-4. Os dashboards do Databricks consultam a Gold.
-5. Quando confirmado, um notebook exporta a Gold para o AnalyticsDB.
-6. A API consulta o AnalyticsDB e entrega os dados ao front-end.
+No `databricks-stocker`, a pipeline Silver lê `workspace.bronze_core` e publica 24 views em `workspace.silver_core`. A pipeline Gold lê a Silver e publica 11 views em `workspace.gold_core`. Ambas foram configuradas na interface do Databricks em modo Triggered e tiveram uma execução manual concluída com o snapshot QA.
 
-## Responsabilidades
+A Gold já fornece dados para a próxima etapa, mas nenhum dashboard da nova arquitetura foi implementado nesta branch. Outro integrante criará os painéis por persona no Databricks; os JSONs em `archive/legacy_dashboards/` são apenas referência da arquitetura anterior.
 
-- databricks-sync: CoreDB → Bronze.
-- databricks-stocker: Bronze → Silver → Gold.
-- AnalyticsDB: armazenamento dos resultados preparados para a aplicação.
-- API: entrega segura dos resultados ao front-end.
+A exportação Gold → AnalyticsDB → API/front também é futura. Antes de publicar dashboards ou dados por empresa, será necessário definir e aplicar o isolamento de acesso na camada consumida.

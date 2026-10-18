@@ -6,8 +6,9 @@ SELECT
     UPPER(TRIM(location_type)) AS location_type
 FROM workspace.bronze_core.local_unit;
 
-CREATE OR REFRESH MATERIALIZED VIEW technical_projects AS
-SELECT
+CREATE OR REFRESH MATERIALIZED VIEW technical_projects
+TBLPROPERTIES ('delta.feature.timestampNtz' = 'supported')
+AS SELECT
     id AS project_id,
     fk_requester AS requester_id,
     fk_local_unit AS local_unit_id,
