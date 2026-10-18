@@ -27,6 +27,7 @@ pipelines/
     transformations/       # SQL da Silver para a Gold
     explorations/          # notebook auxiliar, ainda sem lógica de validação
 exports/                   # notebook reservado para exportar Gold ao AnalyticsDB
+dashboards/                # reservado para os dashboards futuros
 archive/                   # notebooks e dashboards da arquitetura anterior
 ```
 
@@ -48,8 +49,14 @@ archive/                   # notebooks e dashboards da arquitetura anterior
 
 Os vínculos profissionais vêm da origem como `INDEPENDENT`, `AFFILIATED` ou `PARTNER`. A correspondência deles com as personas do aplicativo ainda precisa ser definida pelo time. Contagens e estados atuais não representam séries históricas.
 
-## Próximas entregas
+## Dashboards: próxima etapa
 
-Os dashboards por persona serão desenvolvidos por outro integrante. A pasta `dashboards/` está reservada para seus arquivos exportados. O notebook `exports/export_gold_to_analyticsdb.ipynb` também é apenas um espaço reservado: a exportação para o AnalyticsDB e o consumo pelo front ainda não foram implementados. Filtros de dashboard, sozinhos, não autorizam acesso a dados de outras empresas; essa regra precisará ser definida antes da publicação.
+Nenhum dashboard da nova arquitetura foi implementado nesta branch. As 11 views Gold estão disponíveis como fonte inicial; outro integrante do time ainda criará os painéis no Databricks para administração da Solaria, empresa fornecedora, empresa demandante, profissional contratado e profissional autônomo. O desenho dos painéis, os filtros e a correspondência dos vínculos profissionais com essas personas ainda precisam ser definidos.
 
-Os arquivos de `archive/` são referências anteriores e não participam das pipelines atuais. `entrypoint.sh`, `Dockerfile` e `.env.example` são auxiliares existentes, sem implantação do fluxo analítico por este repositório.
+A pasta `dashboards/` está reservada para os arquivos exportados desses painéis. Os dashboards de `archive/legacy_dashboards/` pertencem à arquitetura anterior e não devem ser tratados como entrega atual. Antes da publicação, o acesso aos dados de cada empresa precisará ser restringido na camada consumida; filtros visuais não substituem essa autorização.
+
+## Outras etapas futuras
+
+O notebook `exports/export_gold_to_analyticsdb.ipynb` é apenas um espaço reservado. A exportação da Gold para o AnalyticsDB e o consumo pela API/front ainda não foram implementados. Os notebooks de `archive/legacy_notebooks/` também são referências anteriores e não participam das pipelines atuais.
+
+`entrypoint.sh`, `Dockerfile` e `.env.example` são auxiliares existentes, sem implantação do fluxo analítico por este repositório.

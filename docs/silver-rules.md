@@ -10,3 +10,5 @@ As seis transformações SQL de `pipelines/01_silver/transformations/` criam 24 
 - `06_energy.sql`: contas de energia.
 
 Os arquivos selecionam e renomeiam campos, normalizam textos e status e preservam IDs de relacionamento. Não há deduplicação, histórico de alterações nem validação completa de qualidade implementados nesta versão. Os detalhes de cada coluna estão nos próprios SQLs.
+
+A Silver alimenta as views Gold. Os dashboards que consumirão a Gold ainda serão implementados em outra etapa; nenhum dashboard novo faz parte desta entrega.
