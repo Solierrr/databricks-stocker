@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.0](https://github.com/Solierrr/databricks-stocker/compare/v0.4.0...v0.5.0) (2026-10-18)
+
+
+### Features
+
+* add Gold KPIs for admin, suppliers, requesters and professionals ([#8](https://github.com/Solierrr/databricks-stocker/issues/8)) ([8d53ad5](https://github.com/Solierrr/databricks-stocker/commit/8d53ad594299c0c51e4dae65e3b4aca7516c1e79))
+* add initial silver transformations ([#6](https://github.com/Solierrr/databricks-stocker/issues/6)) ([e781c36](https://github.com/Solierrr/databricks-stocker/commit/e781c363fb14e7beb06eecc99d6e2868b8acbf8f))
+
 ## [0.4.0](https://github.com/Solierrr/databricks-stocker/compare/v0.3.0...v0.4.0) (2026-10-15)
 
 
