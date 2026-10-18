@@ -1,0 +1,20 @@
+{
+  "id": "11c60c50-de50-417f-83ae-b1f52e412bde",
+  "pipeline_type": "WORKSPACE",
+  "name": "solaria-silver-pipeline",
+  "libraries": [
+    {
+      "glob": {
+        "include": "/Workspace/Users/databricks.solaria@gmail.com/databricks-stocker/pipelines/01_silver/transformations/**"
+      }
+    }
+  ],
+  "schema": "silver_core",
+  "continuous": false,
+  "development": false,
+  "photon": true,
+  "channel": "CURRENT",
+  "catalog": "workspace",
+  "serverless": true,
+  "root_path": "/Workspace/Users/databricks.solaria@gmail.com/databricks-stocker/pipelines/01_silver"
+}
