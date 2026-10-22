@@ -1,6 +1,10 @@
 # Transformações Silver
 
-As seis transformações SQL de `pipelines/01_silver/transformations/` criam 24 views materializadas em `workspace.silver_core` a partir de `workspace.bronze_core`:
+As regras das seis transformações SQL de `archive/legacy_pipelines/01_silver/transformations/`
+foram migradas para `pipelines/00_medallion/transformations/note_silver.py`.
+O notebook único grava as mesmas 24 tabelas Delta gerenciadas em
+`workspace.silver_core` a partir de `workspace.bronze_core`. Os SQLs permanecem
+como referência para revisão da migração:
 
 - `01_companies.sql`: empresas, fornecedores, demandantes, técnicos e vínculos.
 - `02_marketplace.sql`: marcas, modelos, ofertas e estoque.
@@ -11,4 +15,4 @@ As seis transformações SQL de `pipelines/01_silver/transformations/` criam 24 
 
 Os arquivos selecionam e renomeiam campos, normalizam textos e status e preservam IDs de relacionamento. Não há deduplicação, histórico de alterações nem validação completa de qualidade implementados nesta versão. Os detalhes de cada coluna estão nos próprios SQLs.
 
-A Silver alimenta as views Gold. Os dashboards que consumirão a Gold ainda serão implementados em outra etapa; nenhum dashboard novo faz parte desta entrega.
+A Silver alimenta as tabelas Gold. Os dashboards que consumirão a Gold ainda serão implementados em outra etapa; nenhum dashboard novo faz parte desta entrega.

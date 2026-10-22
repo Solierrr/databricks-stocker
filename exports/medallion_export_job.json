@@ -1,25 +1,23 @@
 {
-  "name": "solaria-medallion-gold-export",
+  "name": "solaria-manual-medallion-gold-export",
   "max_concurrent_runs": 1,
   "tasks": [
     {
-      "task_key": "silver",
-      "pipeline_task": {
-        "pipeline_id": "11c60c50-de50-417f-83ae-b1f52e412bde",
-        "full_refresh": false
-      }
-    },
-    {
-      "task_key": "gold",
-      "depends_on": [{"task_key": "silver"}],
-      "pipeline_task": {
-        "pipeline_id": "5f658ca5-9ba0-44de-9ccc-765e43cd1363",
-        "full_refresh": false
+      "task_key": "bronze_silver_gold",
+      "notebook_task": {
+        "notebook_path": "/Workspace/Users/databricks.solaria@gmail.com/databricks-stocker/pipelines/00_medallion/transformations/my_transformation",
+        "source": "WORKSPACE",
+        "base_parameters": {
+          "source_mode": "manual",
+          "fornecedores_path": "/Volumes/workspace/bronze_core/manual_ingestion/fornecedores.xlsx",
+          "admins_path": "/Volumes/workspace/bronze_core/manual_ingestion/admins.xlsx",
+          "allow_replace_existing": "false"
+        }
       }
     },
     {
       "task_key": "analytics_export",
-      "depends_on": [{"task_key": "gold"}],
+      "depends_on": [{"task_key": "bronze_silver_gold"}],
       "notebook_task": {
         "notebook_path": "/Workspace/Users/databricks.solaria@gmail.com/databricks-stocker/exports/trigger_gold_sync",
         "source": "WORKSPACE"
