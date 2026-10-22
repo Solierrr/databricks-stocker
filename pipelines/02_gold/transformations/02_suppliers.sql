@@ -1,4 +1,5 @@
-CREATE OR REFRESH MATERIALIZED VIEW kpi_fornecedor_ofertas_status AS
+CREATE OR REFRESH MATERIALIZED VIEW kpi_fornecedor_ofertas_status
+WITH ROW FILTER workspace.gold_security.can_read_supplier ON (supplier_id) AS
 SELECT
     supplier_id,
     commercial_status,
@@ -6,7 +7,8 @@ SELECT
 FROM workspace.silver_core.offers
 GROUP BY supplier_id, commercial_status;
 
-CREATE OR REFRESH MATERIALIZED VIEW kpi_fornecedor_estoque_modelo AS
+CREATE OR REFRESH MATERIALIZED VIEW kpi_fornecedor_estoque_modelo
+WITH ROW FILTER workspace.gold_security.can_read_supplier ON (supplier_id) AS
 WITH estoque AS (
     SELECT
         supplier_id,
