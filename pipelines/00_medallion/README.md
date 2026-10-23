@@ -61,6 +61,5 @@ original não foram adicionados: não há essas entidades na Silver.
 
 Uma execução lê dois Excel, grava 68 tabelas e usa compute Databricks. Um job
 único não implica consumo zero da cota. Na Free Edition, o compute é
-serverless e sujeito a limite de uso; revise a cota antes de executar. O SQL antigo permanece em
-`archive/legacy_pipelines/`, e as configurações anteriores em
-`archive/recovery/`, apenas como referência.
+serverless e sujeito a limite de uso; revise a cota antes de executar.
+As definições SQL anteriores não são fontes ativas deste job.

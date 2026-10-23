@@ -13,8 +13,6 @@ def _column(source: str, output: str, rule: str = "raw"):
     return value.alias(output)
 
 
-# Each item is (source column, published column, rule). Unlisted columns are
-# deliberately excluded, exactly as in the previous Silver SELECT clauses.
 SPECS = {
     "companies": ("company", [("id", "company_id", "raw"), ("type", "company_type", "upper"), ("status", "company_status", "upper"), ("trade_name", "trade_name", "clean"), ("corporate_name", "corporate_name", "clean"), ("slug", "slug", "clean")]),
     "suppliers": ("supplier", [("id", "supplier_id", "raw"), ("fk_company", "company_id", "raw"), ("status", "supplier_status", "upper"), ("business_type", "business_type", "clean")]),

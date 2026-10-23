@@ -8,8 +8,6 @@ reader is built into Databricks Runtime 17.1+.
 from databricks.sdk.runtime import spark
 
 
-# Sheets and minimum headers are derived from the existing Silver SQL inputs.
-# Bronze retains every additional column in the sheet, as raw source data.
 SHEETS = {
     "fornecedores": {
         "brand": ("id", "fk_owner_company", "name", "normalized_name", "visibility", "archived", "legacy", "created_at", "updated_at"),
