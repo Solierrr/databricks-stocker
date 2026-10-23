@@ -25,7 +25,6 @@ pipelines/
     transformations/       # notebook orquestrador e módulos Bronze, Silver e Gold
 exports/                   # job e notebook que acionam databricks-sync após Gold
 security/                  # row filter e mapa de acesso do fornecedor
-dashboards/                # reservado para os dashboards futuros
 ```
 
 ### Transformações Silver
@@ -49,10 +48,8 @@ Os vínculos profissionais vêm da origem como `INDEPENDENT`, `AFFILIATED` ou `P
 
 Nenhum dashboard da nova arquitetura foi implementado nesta branch. As 19 tabelas Gold são fontes para os painéis. O desenho dos painéis e a correspondência dos vínculos profissionais com as personas ainda precisam ser definidos.
 
-A pasta `dashboards/` está reservada para os arquivos exportados desses painéis. As tabelas de fornecedor usam row filter; provisione `security/supplier_access.sql` e cadastre a identidade do job e do exportador como ADMIN antes da primeira atualização. Não conceda SELECT amplo nas demais tabelas a usuários finais antes de definir políticas por persona.
+As tabelas de fornecedor usam row filter; provisione `security/supplier_access.sql` e cadastre a identidade do job e do exportador como ADMIN antes da primeira atualização. Não conceda SELECT amplo nas demais tabelas a usuários finais antes de definir políticas por persona.
 
 ## Outras etapas futuras
 
-O notebook antigo `exports/export_gold_to_analyticsdb.ipynb` segue como espaço reservado. A exportação usa `exports/trigger_gold_sync.py` para chamar a API após o notebook de transformação. O job, o modo de execução serverless, as permissões e os segredos ainda precisam ser provisionados no Databricks; nenhum serviço foi acionado nesta alteração.
-
-`entrypoint.sh`, `Dockerfile` e `.env.example` são auxiliares existentes, sem implantação do fluxo analítico por este repositório.
+A exportação usa `exports/trigger_gold_sync.py` para chamar a API após o notebook de transformação. O job, o modo de execução serverless, as permissões e os segredos ainda precisam ser provisionados no Databricks; nenhum serviço foi acionado nesta alteração.

@@ -11,8 +11,6 @@ scope = "solaria-sync"
 endpoint = dbutils.secrets.get(scope=scope, key="endpoint-url").rstrip("/")
 token = dbutils.secrets.get(scope=scope, key="api-token")
 
-# One request per successful job run. No automatic retry: repeating the export
-# should be an explicit operational decision.
 request = Request(
     f"{endpoint}/sync/gold",
     headers={"Authorization": f"Bearer {token}"},
