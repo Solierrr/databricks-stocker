@@ -3,6 +3,8 @@
 from pyspark.sql import functions as F
 from databricks.sdk.runtime import spark
 
+from note_catalog import BRONZE, table
+
 
 def _column(source: str, output: str, rule: str = "raw"):
     value = F.col(f"`{source}`")
@@ -41,8 +43,8 @@ SPECS = {
 
 
 def technicians():
-    tech = spark.read.table("workspace.bronze_core.technician").alias("t")
-    people = spark.read.table("workspace.bronze_core.person").alias("p")
+    tech = spark.read.table(table(BRONZE, "technician")).alias("t")
+    people = spark.read.table(table(BRONZE, "person")).alias("p")
     return tech.join(people, F.col("t.fk_person") == F.col("p.id"), "left").select(
         F.col("t.id").alias("technician_id"),
         F.col("t.fk_person").alias("person_id"),
@@ -55,6 +57,6 @@ def silver_frame(name: str):
     if name == "technicians":
         return technicians()
     source, columns = SPECS[name]
-    return spark.read.table(f"workspace.bronze_core.{source}").select(
+    return spark.read.table(table(BRONZE, source)).select(
         *(_column(*column) for column in columns)
     )

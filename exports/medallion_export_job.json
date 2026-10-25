@@ -8,9 +8,10 @@
         "notebook_path": "/Workspace/Users/databricks.solaria@gmail.com/databricks-stocker/pipelines/00_medallion/transformations/my_transformation",
         "source": "WORKSPACE",
         "base_parameters": {
+          "catalog": "analytics",
           "source_mode": "manual",
-          "fornecedores_path": "/Volumes/workspace/bronze_core/manual_ingestion/fornecedores.xlsx",
-          "admins_path": "/Volumes/workspace/bronze_core/manual_ingestion/admins.xlsx",
+          "fornecedores_path": "/Volumes/analytics/bronze_core/manual_ingestion/fornecedores.xlsx",
+          "admins_path": "/Volumes/analytics/bronze_core/manual_ingestion/admins.xlsx",
           "allow_replace_existing": "false"
         }
       }

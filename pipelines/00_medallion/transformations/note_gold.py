@@ -3,12 +3,15 @@
 from pyspark.sql import functions as F
 from databricks.sdk.runtime import spark
 
+from note_catalog import SECURITY, SILVER, table
 
-SUPPLIER_FILTER = "workspace.gold_security.can_read_supplier"
+
+def supplier_filter_name() -> str:
+    return table(SECURITY, "can_read_supplier")
 
 
 def silver(name: str):
-    return spark.read.table(f"workspace.silver_core.{name}")
+    return spark.read.table(table(SILVER, name))
 
 
 def kpi_admin_cadastros():
