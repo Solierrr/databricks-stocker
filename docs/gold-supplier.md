@@ -29,7 +29,7 @@ contém essas entidades. Não os representamos por cobranças de assinatura.
 
 Há duas divergências estáticas com o schema CoreDB versionado:
 `offers` na Silver lê `commercial_status`, ausente em `db/core/schema.sql`, e
-`proposals` lê `fk_supplier`, também ausente. O cálculo novo usa o
+`proposals` lê `supplier_id`, que o DDL anterior também não tinha. O cálculo novo usa o
 relacionamento item → oferta para atribuir fornecedor, mas a pipeline Silver
 definida em `note_silver.py` ainda precisa ser alinhada com a origem efetiva.
 
