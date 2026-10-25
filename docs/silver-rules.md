@@ -3,7 +3,7 @@
 As regras de transformação estão em
 `pipelines/00_medallion/transformations/note_silver.py`.
 O notebook único grava as mesmas 24 tabelas Delta gerenciadas em
-`workspace.silver_core` a partir de `workspace.bronze_core`:
+`analytics.silver` a partir de `analytics.bronze_core`:
 
 - Empresas, fornecedores, demandantes, técnicos e vínculos.
 - Marcas, modelos, ofertas e estoque.
