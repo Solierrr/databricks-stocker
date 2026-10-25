@@ -14,37 +14,37 @@ def silver(name: str):
     return spark.read.table(table(SILVER, name))
 
 
-def kpi_admin_cadastros():
+def kpi_admin_registrations():
     suppliers = silver("suppliers").where(F.col("supplier_status") == "ACTIVE").agg(
-        F.countDistinct("supplier_id").alias("fornecedores_ativos")
+        F.countDistinct("supplier_id").alias("active_suppliers")
     )
     requesters = silver("requesters").agg(
-        F.countDistinct("requester_id").alias("demandantes_cadastrados")
+        F.countDistinct("requester_id").alias("registered_requesters")
     )
     return suppliers.crossJoin(requesters)
 
 
-def kpi_admin_modelos_status():
+def kpi_admin_models_by_status():
     return silver("product_models").groupBy("model_status").agg(
-        F.countDistinct("model_id").alias("total_modelos")
+        F.countDistinct("model_id").alias("model_count")
     )
 
 
-def kpi_admin_propostas_status():
+def kpi_admin_proposals_by_status():
     return silver("proposals").groupBy("proposal_status").agg(
-        F.countDistinct("proposal_id").alias("total_propostas")
+        F.countDistinct("proposal_id").alias("proposal_count")
     )
 
 
-def kpi_fornecedor_ofertas_status():
+def kpi_supplier_offers_by_status():
     return silver("offers").groupBy("supplier_id", "commercial_status").agg(
-        F.countDistinct("offer_id").alias("total_ofertas")
+        F.countDistinct("offer_id").alias("offer_count")
     )
 
 
-def kpi_fornecedor_estoque_modelo():
+def kpi_supplier_stock_by_model():
     stock = silver("inventory_items").groupBy("supplier_id", "model_id").agg(
-        F.sum("quantity").alias("unidades_estoque")
+        F.sum("quantity").alias("stock_units")
     ).alias("e")
     models = silver("product_models").alias("m")
     brands = silver("brands").alias("b")
@@ -53,19 +53,19 @@ def kpi_fornecedor_estoque_modelo():
         .join(brands, F.col("m.brand_id") == F.col("b.brand_id"), "left")
         .select(
             F.col("e.supplier_id"), F.col("e.model_id"),
-            F.col("m.model_name"), F.col("b.brand_name"), F.col("e.unidades_estoque"),
+            F.col("m.model_name"), F.col("b.brand_name"), F.col("e.stock_units"),
         ))
 
 
-def kpi_demandante_resumo():
+def kpi_requester_summary():
     units = silver("local_units").groupBy("requester_id").agg(
-        F.countDistinct("local_unit_id").alias("unidades_cadastradas")
+        F.countDistinct("local_unit_id").alias("registered_local_units")
     ).alias("u")
     proposals = silver("proposals").groupBy("requester_id").agg(
-        F.countDistinct("proposal_id").alias("propostas_cadastradas")
+        F.countDistinct("proposal_id").alias("registered_proposals")
     ).alias("p")
     projects = silver("technical_projects").groupBy("requester_id").agg(
-        F.countDistinct("project_id").alias("projetos_cadastrados")
+        F.countDistinct("project_id").alias("registered_projects")
     ).alias("t")
     requesters = silver("requesters").alias("r")
     return (requesters
@@ -74,27 +74,27 @@ def kpi_demandante_resumo():
         .join(projects, F.col("t.requester_id") == F.col("r.requester_id"), "left")
         .select(
             F.col("r.requester_id"), F.col("r.company_id"),
-            F.coalesce(F.col("u.unidades_cadastradas"), F.lit(0)).alias("unidades_cadastradas"),
-            F.coalesce(F.col("p.propostas_cadastradas"), F.lit(0)).alias("propostas_cadastradas"),
-            F.coalesce(F.col("t.projetos_cadastrados"), F.lit(0)).alias("projetos_cadastrados"),
+            F.coalesce(F.col("u.registered_local_units"), F.lit(0)).alias("registered_local_units"),
+            F.coalesce(F.col("p.registered_proposals"), F.lit(0)).alias("registered_proposals"),
+            F.coalesce(F.col("t.registered_projects"), F.lit(0)).alias("registered_projects"),
         ))
 
 
-def kpi_demandante_propostas_status():
+def kpi_requester_proposals_by_status():
     return (silver("proposals")
         .where(F.col("requester_id").isNotNull())
         .groupBy("requester_id", "proposal_status")
-        .agg(F.countDistinct("proposal_id").alias("total_propostas")))
+        .agg(F.countDistinct("proposal_id").alias("proposal_count")))
 
 
-def kpi_demandante_projetos_status():
+def kpi_requester_projects_by_status():
     return (silver("technical_projects")
         .where(F.col("requester_id").isNotNull())
         .groupBy("requester_id", "project_status")
-        .agg(F.countDistinct("project_id").alias("total_projetos")))
+        .agg(F.countDistinct("project_id").alias("project_count")))
 
 
-def kpi_profissional_resumo():
+def kpi_professional_summary():
     affiliations = silver("technician_affiliations").alias("a")
     technicians = silver("technicians").alias("t")
     executors = silver("service_executors").alias("e")
@@ -109,10 +109,10 @@ def kpi_profissional_resumo():
         )
         .groupBy("affiliation_id", "technician_id", "user_id", "company_id",
                  "affiliation_type", "affiliation_active")
-        .agg(F.countDistinct("service_id").alias("servicos_atribuidos")))
+        .agg(F.countDistinct("service_id").alias("assigned_service_count")))
 
 
-def kpi_profissional_servicos_status():
+def kpi_professional_services_by_status():
     affiliations = silver("technician_affiliations").alias("a")
     executors = silver("service_executors").alias("e")
     services = silver("technical_services").alias("s")
@@ -125,20 +125,20 @@ def kpi_profissional_servicos_status():
             F.col("e.service_id"),
         )
         .groupBy("affiliation_id", "technician_id", "affiliation_type", "service_status")
-        .agg(F.countDistinct("service_id").alias("total_servicos")))
+        .agg(F.countDistinct("service_id").alias("service_count")))
 
 
-def kpi_profissional_avaliacoes():
+def kpi_professional_reviews():
     return (silver("professional_reviews")
         .where(F.col("is_active") == F.lit(True))
         .groupBy("technician_id")
         .agg(
-            F.countDistinct("review_id").alias("total_avaliacoes"),
-            F.round(F.avg("rating"), 2).alias("nota_media"),
+            F.countDistinct("review_id").alias("review_count"),
+            F.round(F.avg("rating"), 2).alias("average_rating"),
         ))
 
 
-def kpi_fornecedor_ofertas_resumo():
+def kpi_supplier_offers_summary():
     suppliers = silver("suppliers").alias("s")
     offers = silver("offers").alias("o")
     reference = F.current_date()
@@ -147,20 +147,20 @@ def kpi_fornecedor_ofertas_resumo():
               (F.col("o.expires_at").isNull() | (expiry >= reference)))
     return (suppliers
         .join(offers, F.col("o.supplier_id") == F.col("s.supplier_id"), "left")
-        .groupBy(F.col("s.supplier_id"), reference.alias("data_referencia"))
+        .groupBy(F.col("s.supplier_id"), reference.alias("reference_date"))
         .agg(
-            F.countDistinct("o.offer_id").alias("ofertas_cadastradas"),
-            F.countDistinct(F.when(active, F.col("o.offer_id"))).alias("ofertas_ativas"),
-            F.avg("o.unit_price").alias("preco_medio_anunciado"),
-            F.avg(F.when(active, F.col("o.unit_price"))).alias("preco_medio_anunciado_ativo"),
-            F.sum("o.availability").alias("disponibilidade_anunciada"),
-            F.countDistinct(F.when(expiry < reference, F.col("o.offer_id"))).alias("ofertas_expiradas"),
+            F.countDistinct("o.offer_id").alias("registered_offers"),
+            F.countDistinct(F.when(active, F.col("o.offer_id"))).alias("active_offers"),
+            F.avg("o.unit_price").alias("avg_listed_price"),
+            F.avg(F.when(active, F.col("o.unit_price"))).alias("avg_active_listed_price"),
+            F.sum("o.availability").alias("listed_availability"),
+            F.countDistinct(F.when(expiry < reference, F.col("o.offer_id"))).alias("expired_offers"),
             F.countDistinct(F.when((expiry >= reference) & (expiry < F.date_add(reference, 30)),
-                                   F.col("o.offer_id"))).alias("ofertas_vencendo_30_dias"),
+                                   F.col("o.offer_id"))).alias("offers_expiring_in_30_days"),
         ))
 
 
-def kpi_fornecedor_ofertas_detalhe():
+def kpi_supplier_offer_details():
     offers = silver("offers").alias("o")
     models = silver("product_models").alias("m")
     brands = silver("brands").alias("b")
@@ -174,18 +174,18 @@ def kpi_fornecedor_ofertas_detalhe():
         ))
 
 
-def kpi_fornecedor_estoque_resumo():
+def kpi_supplier_stock_summary():
     stock = silver("inventory_items").groupBy("supplier_id", "model_id").agg(
-        F.sum("quantity").alias("unidades_estoque")
+        F.sum("quantity").alias("stock_units")
     ).alias("e")
     suppliers = silver("suppliers").alias("s")
     return (suppliers
         .join(stock, F.col("e.supplier_id") == F.col("s.supplier_id"), "left")
         .groupBy(F.col("s.supplier_id"))
         .agg(
-            F.sum("e.unidades_estoque").alias("unidades_estoque"),
-            F.countDistinct(F.when(F.col("e.unidades_estoque") > 0,
-                                   F.col("e.model_id"))).alias("produtos_com_estoque"),
+            F.sum("e.stock_units").alias("stock_units"),
+            F.countDistinct(F.when(F.col("e.stock_units") > 0,
+                                   F.col("e.model_id"))).alias("models_in_stock"),
         ))
 
 
@@ -198,13 +198,13 @@ def _supplier_proposal_items():
         .join(proposals, F.col("p.proposal_id") == F.col("i.proposal_id")))
 
 
-def kpi_fornecedor_propostas_status():
+def kpi_supplier_proposals_by_status():
     return (_supplier_proposal_items()
         .groupBy(F.col("o.supplier_id"), F.col("p.proposal_status"))
-        .agg(F.countDistinct("p.proposal_id").alias("propostas_recebidas")))
+        .agg(F.countDistinct("p.proposal_id").alias("received_proposals")))
 
 
-def kpi_fornecedor_propostas_resumo():
+def kpi_supplier_proposals_summary():
     source = _supplier_proposal_items()
     supplier_proposals = source.select(
         F.col("o.supplier_id").alias("supplier_id"),
@@ -214,20 +214,20 @@ def kpi_fornecedor_propostas_resumo():
     status = F.col("proposal_status")
     proposal_counts = supplier_proposals.groupBy("supplier_id").agg(
         F.countDistinct(F.when(status.isin("AWAITING_SUPPLIER", "AWAITING_REQUESTER"),
-                               F.col("proposal_id"))).alias("propostas_abertas"),
-        F.countDistinct(F.when(status == "ACCEPTED", F.col("proposal_id"))).alias("propostas_aceitas"),
+                               F.col("proposal_id"))).alias("open_proposals"),
+        F.countDistinct(F.when(status == "ACCEPTED", F.col("proposal_id"))).alias("accepted_proposals"),
         F.countDistinct(F.when(status.isin("ACCEPTED", "REJECTED", "CANCELED"),
-                               F.col("proposal_id"))).alias("propostas_encerradas"),
+                               F.col("proposal_id"))).alias("closed_proposals"),
     ).alias("p")
     accepted = F.col("p.proposal_status") == "ACCEPTED"
     items = source.groupBy(F.col("o.supplier_id")).agg(
-        F.count(F.when(accepted, F.lit(1))).alias("itens_aceitos"),
+        F.count(F.when(accepted, F.lit(1))).alias("accepted_items"),
         F.count(F.when(accepted & F.col("i.negotiated_unit_price").isNull(), F.lit(1)))
-            .alias("itens_aceitos_sem_preco"),
+            .alias("accepted_items_without_price"),
         F.count(F.when(accepted & F.col("i.negotiated_unit_price").isNotNull(), F.lit(1)))
-            .alias("itens_aceitos_com_preco"),
+            .alias("accepted_items_with_price"),
         F.sum(F.when(accepted, F.col("i.negotiated_unit_price") * F.col("i.quantity")))
-            .alias("valor_negociado_aceito"),
+            .alias("accepted_negotiated_value"),
     ).alias("i")
     suppliers = silver("suppliers").alias("s")
     return (suppliers
@@ -235,21 +235,21 @@ def kpi_fornecedor_propostas_resumo():
         .join(items, F.col("i.supplier_id") == F.col("s.supplier_id"), "left")
         .select(
             F.col("s.supplier_id"),
-            F.coalesce(F.col("p.propostas_abertas"), F.lit(0)).alias("propostas_abertas_recebidas"),
-            F.coalesce(F.col("p.propostas_aceitas"), F.lit(0)).alias("propostas_aceitas"),
-            F.coalesce(F.col("p.propostas_encerradas"), F.lit(0)).alias("propostas_encerradas"),
-            (F.lit(100.0) * F.col("p.propostas_aceitas") /
-             F.nullif(F.col("p.propostas_encerradas"), F.lit(0)))
-                .alias("taxa_aceite_encerradas_percentual"),
-            F.coalesce(F.col("i.itens_aceitos_sem_preco"), F.lit(0)).alias("itens_aceitos_sem_preco"),
-            (F.lit(100.0) * F.col("i.itens_aceitos_com_preco") /
-             F.nullif(F.col("i.itens_aceitos"), F.lit(0)))
-                .alias("cobertura_preco_itens_aceitos_percentual"),
-            F.col("i.valor_negociado_aceito"),
+            F.coalesce(F.col("p.open_proposals"), F.lit(0)).alias("open_received_proposals"),
+            F.coalesce(F.col("p.accepted_proposals"), F.lit(0)).alias("accepted_proposals"),
+            F.coalesce(F.col("p.closed_proposals"), F.lit(0)).alias("closed_proposals"),
+            (F.lit(100.0) * F.col("p.accepted_proposals") /
+             F.nullif(F.col("p.closed_proposals"), F.lit(0)))
+                .alias("closed_acceptance_rate_pct"),
+            F.coalesce(F.col("i.accepted_items_without_price"), F.lit(0)).alias("accepted_items_without_price"),
+            (F.lit(100.0) * F.col("i.accepted_items_with_price") /
+             F.nullif(F.col("i.accepted_items"), F.lit(0)))
+                .alias("accepted_items_price_coverage_pct"),
+            F.col("i.accepted_negotiated_value"),
         ))
 
 
-def kpi_fornecedor_valor_aceito_produto():
+def kpi_supplier_accepted_value_by_model():
     source = _supplier_proposal_items().where(F.col("p.proposal_status") == "ACCEPTED")
     models = silver("product_models").alias("m")
     brands = silver("brands").alias("b")
@@ -259,24 +259,24 @@ def kpi_fornecedor_valor_aceito_produto():
         .groupBy(F.col("o.supplier_id"), F.col("o.model_id"),
                  F.col("b.brand_name"), F.col("m.model_name"))
         .agg(F.sum(F.col("i.negotiated_unit_price") * F.col("i.quantity"))
-             .alias("valor_negociado_aceito")))
+             .alias("accepted_negotiated_value")))
 
 
-def kpi_fornecedor_valor_aceito_mes():
+def kpi_supplier_accepted_value_by_month():
     source = _supplier_proposal_items().where(F.col("p.proposal_status") == "ACCEPTED")
     return (source
         .groupBy(F.col("o.supplier_id"),
-                 F.date_trunc("MONTH", F.col("p.created_at")).alias("mes_criacao_proposta_proxy"))
+                 F.date_trunc("MONTH", F.col("p.created_at")).alias("proposal_created_month_proxy"))
         .agg(F.sum(F.col("i.negotiated_unit_price") * F.col("i.quantity"))
-             .alias("valor_negociado_aceito")))
+             .alias("accepted_negotiated_value")))
 
 
-def kpi_fornecedor_ofertas_aceitas_data():
+def kpi_supplier_accepted_offers_by_date():
     source = _supplier_proposal_items().where(F.col("p.proposal_status") == "ACCEPTED")
     return (source
         .groupBy(F.col("o.supplier_id"), F.col("o.offer_id"), F.col("o.model_id"),
-                 F.to_date(F.col("p.created_at")).alias("data_criacao_proposta_proxy"))
-        .agg(F.countDistinct("p.proposal_id").alias("propostas_aceitas")))
+                 F.to_date(F.col("p.created_at")).alias("proposal_created_date_proxy"))
+        .agg(F.countDistinct("p.proposal_id").alias("accepted_proposals")))
 
 
 GOLD_BUILDERS = {
@@ -285,5 +285,5 @@ GOLD_BUILDERS = {
 }
 
 SUPPLIER_TABLES = frozenset(
-    name for name in GOLD_BUILDERS if name.startswith("kpi_fornecedor_")
+    name for name in GOLD_BUILDERS if name.startswith("kpi_supplier_")
 )
