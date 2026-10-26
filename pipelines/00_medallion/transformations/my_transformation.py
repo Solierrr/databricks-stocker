@@ -70,9 +70,11 @@ def run() -> None:
         )
 
     for workbook, sheets in SHEETS.items():
-        spark.conf.set(f"solaria.excel.{workbook}", source_paths[workbook])
         for sheet, required in sheets.items():
-            _write_table(f"workspace.bronze_core.{sheet}", read_bronze(workbook, sheet, required))
+            _write_table(
+                f"workspace.bronze_core.{sheet}",
+                read_bronze(workbook, sheet, required, source_paths[workbook]),
+            )
 
     for name in (*SPECS, "technicians"):
         _write_table(f"workspace.silver_core.{name}", silver_frame(name))
