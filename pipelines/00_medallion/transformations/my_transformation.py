@@ -1,4 +1,8 @@
 # Databricks notebook source
+# /// script
+# [tool.databricks.environment]
+# environment_version = "6"
+# ///
 """One notebook job: Excel -> Bronze -> Silver -> Gold managed Delta tables.
 
 Run only after the old pipeline-owned objects have been migrated. This module
@@ -78,6 +82,10 @@ def run() -> None:
         raise ValueError("Only source_mode=manual is implemented; automatic CoreDB ingestion is not configured")
 
     source_paths = {
+
+
+
+
         "fornecedores": _parameter("fornecedores_path", f"/Volumes/{catalog()}/{BRONZE}/manual_ingestion/fornecedores.xlsx"),
         "admins": _parameter("admins_path", f"/Volumes/{catalog()}/{BRONZE}/manual_ingestion/admins.xlsx"),
     }
