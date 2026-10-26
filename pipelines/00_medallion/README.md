@@ -32,8 +32,9 @@ Bronze. Falta de aba ou coluna causa falha explícita.
 As 18 abas de admins incluem as fontes de demandante e profissional para
 preservar os 19 KPIs. As 7 abas de fornecedores incluem relações compartilhadas
 com KPIs administrativos. IDs e FKs devem ser coerentes entre abas. Formate
-UUIDs como texto; datas, números e booleanos precisam ter tipos adequados no
-Excel. A leitura nativa exige Databricks Runtime 17.1 ou superior.
+UUIDs como texto; datas, números e booleanos podem vir como texto se seus valores
+forem conversíveis. A Silver valida as colunas, os IDs e essas conversões antes
+de publicar cada tabela. A leitura nativa exige Databricks Runtime 17.1 ou superior.
 
 Nomes de abas e colunas seguem o baseline renomeado do CoreDB (views do schema
 `export`): FKs como `<tabela>_id`, booleanos com `is_`/`has_`, datas com

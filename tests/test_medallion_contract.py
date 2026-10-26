@@ -5,7 +5,7 @@ import sys
 import types
 import unittest
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 
 TRANSFORMATIONS = Path(__file__).resolve().parents[1] / "pipelines/00_medallion/transformations"
@@ -58,6 +58,42 @@ class BronzeContractTest(unittest.TestCase):
     def test_missing_columns_fail_before_publication(self):
         with self.assertRaisesRegex(ValueError, "missing columns .*status"):
             self.read_bronze("admins", "company", ("id", "status"), "/Volumes/admins.xlsx")
+
+
+class SilverContractTest(unittest.TestCase):
+    def setUp(self):
+        pyspark = types.ModuleType("pyspark")
+        sql = types.ModuleType("pyspark.sql")
+        sql.functions = MagicMock()
+        sql.functions.col.return_value.__gt__.return_value = MagicMock()
+        catalog = types.ModuleType("note_catalog")
+        catalog.BRONZE = "bronze_core"
+        catalog.table = lambda schema, name: f"workspace.{schema}.{name}"
+        with patch.dict(sys.modules, {**runtime_modules(Mock()), "pyspark": pyspark,
+                                      "pyspark.sql": sql, "note_catalog": catalog}):
+            self.validate = runpy.run_path(str(TRANSFORMATIONS / "note_silver.py"))["_validate_source"]
+
+    def test_missing_source_column_is_reported(self):
+        frame = Mock(columns=["id"])
+        with self.assertRaisesRegex(ValueError, "Bronze offer: missing Silver columns .*unit_price"):
+            self.validate(frame, "offer", [("id", "offer_id", "raw"), ("unit_price", "unit_price", "raw")])
+        frame.agg.assert_not_called()
+
+    def test_invalid_numeric_value_is_reported(self):
+        frame = Mock(columns=["id", "unit_price"])
+        frame.agg.return_value.first.return_value.asDict.return_value = {"id": 0, "unit_price": 2}
+        with self.assertRaisesRegex(ValueError, "Bronze offer: invalid Silver values .*'unit_price': 2"):
+            self.validate(frame, "offer", [("id", "offer_id", "raw"), ("unit_price", "unit_price", "raw")])
+        frame.groupBy.assert_not_called()
+
+    def test_duplicate_id_is_reported(self):
+        frame = Mock(columns=["id"])
+        frame.agg.return_value.first.return_value.asDict.return_value = {"id": 0}
+        frame.groupBy.return_value.count.return_value.where.return_value.limit.return_value.collect.return_value = [
+            {"row_id": "duplicate"}
+        ]
+        with self.assertRaisesRegex(ValueError, "Bronze offer: duplicate id 'duplicate'"):
+            self.validate(frame, "offer", [("id", "offer_id", "raw")])
 
 
 class NotebookContractTest(unittest.TestCase):

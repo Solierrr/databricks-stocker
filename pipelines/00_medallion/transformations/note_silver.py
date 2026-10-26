@@ -6,13 +6,68 @@ from databricks.sdk.runtime import spark
 from note_catalog import BRONZE, table
 
 
-def _column(source: str, output: str, rule: str = "raw"):
-    value = F.col(f"`{source}`")
+# Excel exports store these measures and flags as text. Keep identifiers as
+# strings, but publish typed Silver columns before Gold performs arithmetic.
+NUMERIC_TYPES = {
+    "quantity": "bigint",
+    "availability": "bigint",
+    "unit_price": "decimal(18,2)",
+    "negotiated_unit_price": "decimal(18,2)",
+    "discount": "decimal(18,2)",
+    "discount_percentage": "decimal(18,2)",
+    "total_amount": "decimal(18,2)",
+    "plan_price": "decimal(18,2)",
+    "amount": "decimal(18,2)",
+    "rating": "decimal(18,2)",
+    "power_wp": "decimal(18,4)",
+    "efficiency": "decimal(18,4)",
+    "width": "decimal(18,4)",
+    "length": "decimal(18,4)",
+    "weight": "decimal(18,4)",
+    "consumption": "decimal(18,4)",
+}
+BOOLEAN_COLUMNS = {
+    "is_active", "is_archived", "is_legacy", "is_onsite",
+    "has_insurance", "has_utility_approval", "has_auto_renewal",
+}
+DATE_COLUMNS = {"delivery_deadline_date", "due_date"}
+TIMESTAMP_COLUMNS = {
+    "created_at", "updated_at", "expires_at", "starts_at", "ends_at",
+    "scheduled_at", "accepted_at", "paid_at",
+}
+
+
+def _text(source: str):
+    identifier = ".".join(f"`{part}`" for part in source.split("."))
+    return F.nullif(F.trim(F.col(identifier).cast("string")), F.lit(""))
+
+
+def _value(source: str, output: str, rule: str = "raw"):
+    value = _text(source)
+    identifier = ".".join(f"`{part}`" for part in source.split("."))
+    clean = f"nullif(trim(cast({identifier} as string)), '')"
+    if output in NUMERIC_TYPES:
+        if NUMERIC_TYPES[output] == "bigint":
+            parsed = f"try_cast({clean} as decimal(38,10))"
+            return F.expr(
+                f"case when {parsed} = floor({parsed}) "
+                f"then try_cast({parsed} as bigint) end"
+            )
+        return F.expr(f"try_cast({clean} as {NUMERIC_TYPES[output]})")
+    if output in DATE_COLUMNS | TIMESTAMP_COLUMNS:
+        kind = "date" if output in DATE_COLUMNS else "timestamp"
+        return F.expr(f"try_cast({clean} as {kind})")
+    if output in BOOLEAN_COLUMNS:
+        normalized = F.lower(value)
+        return (F.when(normalized.isin("t", "true", "1"), F.lit(True))
+                .when(normalized.isin("f", "false", "0"), F.lit(False)))
     if rule == "upper":
-        value = F.upper(F.trim(value))
-    elif rule == "clean":
-        value = F.nullif(F.trim(value), F.lit(""))
-    return value.alias(output)
+        return F.upper(value)
+    return value
+
+
+def _column(source: str, output: str, rule: str = "raw"):
+    return _value(source, output, rule).alias(output)
 
 
 SPECS = {
@@ -42,14 +97,50 @@ SPECS = {
 }
 
 
+def _validate_source(frame, name: str, columns) -> None:
+    """Reject missing fields, malformed values and duplicate or empty row IDs."""
+    missing = sorted({source for source, _, _ in columns} - set(frame.columns))
+    if missing:
+        raise ValueError(f"Bronze {name}: missing Silver columns {missing}")
+
+    checks = {"id": _text("id").isNull()}
+    for source, output, rule in columns:
+        if output in NUMERIC_TYPES or output in BOOLEAN_COLUMNS or output in DATE_COLUMNS | TIMESTAMP_COLUMNS:
+            converted = _value(source, output, rule)
+            invalid = converted.isNull()
+            if output in NUMERIC_TYPES:
+                identifier = ".".join(f"`{part}`" for part in source.split("."))
+                parsed = F.expr(
+                    f"try_cast(nullif(trim(cast({identifier} as string)), '') as decimal(38,10))"
+                )
+                invalid = invalid | (parsed.isNotNull() &
+                                     (parsed != converted.cast("decimal(38,10)")))
+            checks[output] = _text(source).isNotNull() & invalid
+
+    counts = frame.agg(*(
+        F.sum(F.when(condition, F.lit(1)).otherwise(F.lit(0))).alias(field)
+        for field, condition in checks.items()
+    )).first().asDict()
+    invalid = {field: count for field, count in counts.items() if count}
+    if invalid:
+        raise ValueError(f"Bronze {name}: invalid Silver values (field: row count): {invalid}")
+
+    duplicate = (frame.groupBy(_text("id").alias("row_id"))
+                 .count().where(F.col("count") > 1).limit(1).collect())
+    if duplicate:
+        raise ValueError(f"Bronze {name}: duplicate id {duplicate[0]['row_id']!r}")
+
+
 def technicians():
     tech = spark.read.table(table(BRONZE, "technician")).alias("t")
     people = spark.read.table(table(BRONZE, "person")).alias("p")
+    _validate_source(tech, "technician", [("id", "technician_id", "raw"), ("person_id", "person_id", "raw"), ("slug", "technician_slug", "clean")])
+    _validate_source(people, "person", [("id", "person_id", "raw"), ("user_id", "user_id", "raw")])
     return tech.join(people, F.col("t.person_id") == F.col("p.id"), "left").select(
-        F.col("t.id").alias("technician_id"),
-        F.col("t.person_id").alias("person_id"),
-        F.col("p.user_id").alias("user_id"),
-        F.nullif(F.trim(F.col("t.slug")), F.lit("")).alias("technician_slug"),
+        _column("t.id", "technician_id"),
+        _column("t.person_id", "person_id"),
+        _column("p.user_id", "user_id"),
+        _column("t.slug", "technician_slug", "clean"),
     )
 
 
@@ -57,6 +148,8 @@ def silver_frame(name: str):
     if name == "technicians":
         return technicians()
     source, columns = SPECS[name]
-    return spark.read.table(table(BRONZE, source)).select(
+    frame = spark.read.table(table(BRONZE, source))
+    _validate_source(frame, source, columns)
+    return frame.select(
         *(_column(*column) for column in columns)
     )

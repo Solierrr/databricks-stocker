@@ -90,8 +90,10 @@ def run() -> None:
                 read_bronze(workbook, sheet, required, source_paths[workbook]),
             )
 
-    for name in (*SPECS, "technicians"):
-        _write_table(table(SILVER, name), silver_frame(name))
+    # Validate every Bronze source before publishing any Silver table.
+    silver_frames = [(name, silver_frame(name)) for name in (*SPECS, "technicians")]
+    for name, frame in silver_frames:
+        _write_table(table(SILVER, name), frame)
 
     for name, build in GOLD_BUILDERS.items():
         _write_table(
