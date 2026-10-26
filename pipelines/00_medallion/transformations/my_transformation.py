@@ -10,7 +10,7 @@ import re
 from databricks.sdk.runtime import dbutils, spark
 
 from note_bronze import SHEETS, read_bronze
-from note_catalog import BRONZE, CATALOG_KEY, DEFAULT_CATALOG, GOLD, SILVER, catalog, table
+from note_catalog import BRONZE, DEFAULT_CATALOG, GOLD, SILVER, catalog, set_catalog, table
 from note_gold import GOLD_BUILDERS, SUPPLIER_TABLES, supplier_filter_name
 from note_silver import SPECS, silver_frame
 
@@ -58,7 +58,7 @@ def _write_table(name: str, frame, *, supplier_filter: bool = False) -> None:
 
 
 def run() -> None:
-    spark.conf.set(CATALOG_KEY, _catalog_parameter())
+    set_catalog(_catalog_parameter())
     source_mode = _parameter("source_mode", "manual").lower()
     if source_mode != "manual":
         raise ValueError("Only source_mode=manual is implemented; automatic CoreDB ingestion is not configured")
@@ -70,6 +70,9 @@ def run() -> None:
     allow_replace = _parameter("allow_replace_existing", "false").lower() == "true"
     if not all(source_paths.values()):
         raise ValueError("Both workbook paths are required")
+
+    for schema in (SILVER, GOLD):
+        spark.sql(f"CREATE SCHEMA IF NOT EXISTS {catalog()}.{schema}")
 
     targets = _targets()
     existing = [name for name in targets if spark.catalog.tableExists(name)]
@@ -83,7 +86,7 @@ def run() -> None:
     for workbook, sheets in SHEETS.items():
         for sheet, required in sheets.items():
             _write_table(
-                f"workspace.bronze_core.{sheet}",
+                table(BRONZE, sheet),
                 read_bronze(workbook, sheet, required, source_paths[workbook]),
             )
 

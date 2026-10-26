@@ -37,10 +37,11 @@ Excel. A leitura nativa exige Databricks Runtime 17.1 ou superior.
 
 Nomes de abas e colunas seguem o baseline renomeado do CoreDB (views do schema
 `export`): FKs como `<tabela>_id`, booleanos com `is_`/`has_`, datas com
-`_at`, `company_plan` no singular e `model_name`. Os arquivos em `recovery/`
-ainda usam os nomes anteriores e precisam ser regerados a partir das views
-`export` antes de uma execução. O catálogo é o parâmetro `catalog` do job
-(`analytics`; `analyticsqa` em QA), e os volumes dos caminhos devem pertencer
+`_at`, `company_plan` no singular e `model_name`. A leitura Bronze também aceita
+os cabeçalhos anteriores dos arquivos em `recovery/` e a aba `company_plans`,
+renomeando as colunas necessárias antes de publicar as tabelas Bronze. O
+catálogo é o parâmetro `catalog` (`workspace` na execução manual sem parâmetro;
+o job versionado usa `analytics`), e os volumes dos caminhos devem pertencer
 a esse catálogo. Os quatro indicadores condicionais de pedidos do documento
 original não foram adicionados: não há essas entidades na Silver.
 
@@ -50,15 +51,17 @@ Se `my_transformation` falhar com `read_bronze() takes 3 positional arguments
 but 4 were given`, atualize **os dois** arquivos
 `transformations/my_transformation.py` e `transformations/note_bronze.py` no
 workspace. A versão atual passa o caminho do Excel como quarto argumento e
-`read_bronze` aceita esse argumento; chamadas antigas com três argumentos
-continuam válidas. Reinicie a sessão Python do notebook antes de executar de
+`read_bronze` exige esse argumento. Reinicie a sessão Python do notebook antes de executar de
 novo, pois módulos já importados podem permanecer em cache.
 
-1. Revise as duas planilhas e os caminhos, e disponibilize os quatro arquivos
+1. Revise as duas planilhas e os caminhos, e disponibilize os cinco arquivos
    Python no mesmo diretório do workspace. Revise o runtime, o caminho do
-   notebook no job e a configuração de execução serverless da conta.
-2. Provisione `analytics.gold_security.can_read_supplier` e o mapa de acesso
-   conforme `security/supplier_access.sql`. Conceda acesso ADMIN à identidade
+   notebook no job e a configuração de execução serverless da conta. O notebook
+   cria os schemas Silver e Gold caso ainda não existam, se tiver permissão.
+2. Provisione `workspace.gold_security.can_read_supplier` e o mapa de acesso
+   conforme `security/supplier_access.sql` para a execução manual. Para o job
+   em `analytics`, altere `USE CATALOG` no script antes de executá-lo. Conceda
+   acesso ADMIN à identidade
    que executará o notebook e à identidade exportadora.
 3. Preserve snapshots das tabelas Bronze e das views Silver/Gold atuais.
    Desative as pipelines antigas e resolva a propriedade e os nomes de seus
