@@ -42,12 +42,8 @@ SHEETS = {
 
 
 def read_bronze(
-    workbook: str, sheet: str, required: tuple[str, ...], path: str | None = None
+    workbook: str, sheet: str, required: tuple[str, ...], path: str
 ):
-    # Keep the three-argument form for notebooks that configure the Spark key.
-    # The job passes the workbook path explicitly to avoid relying on session state.
-    if path is None:
-        path = spark.conf.get(f"solaria.excel.{workbook}", "")
     if not path:
         raise ValueError(f"Set a path for {workbook}.xlsx")
     frame = (

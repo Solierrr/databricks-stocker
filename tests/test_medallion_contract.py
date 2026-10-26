@@ -40,10 +40,10 @@ class BronzeContractTest(unittest.TestCase):
         )
         self.spark.conf.get.assert_not_called()
 
-    def test_three_argument_legacy_call_uses_spark_config(self):
-        self.spark.conf.get.return_value = "/Volumes/legacy.xlsx"
-        self.read_bronze("admins", "company", ("id",))
-        self.spark.conf.get.assert_called_once_with("solaria.excel.admins", "")
+    def test_empty_path_fails_before_reading(self):
+        with self.assertRaisesRegex(ValueError, "Set a path for admins.xlsx"):
+            self.read_bronze("admins", "company", ("id",), "")
+        self.spark.read.format.assert_not_called()
 
     def test_missing_columns_fail_before_publication(self):
         with self.assertRaisesRegex(ValueError, "missing columns .*status"):
