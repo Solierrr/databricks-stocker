@@ -11,9 +11,9 @@ fornecedores.xlsx + admins.xlsx -> notebook único de transformação:
                                                    `-> databricks-sync /sync/gold -> AnalyticsDB
 ```
 
-- **Bronze (`workspace.bronze_core`):** 25 entidades lidas de abas dos dois Excel no novo modo manual. A carga QA anterior veio de CSV; o serviço CoreDB → Bronze permanece como caminho anterior e exige cutover antes de publicar nos mesmos nomes.
-- **Silver (`workspace.silver_core`):** 24 tabelas Delta gerenciadas que selecionam campos, normalizam textos e status e preservam as chaves para relacionamentos. As regras ainda podem evoluir com o domínio.
-- **Gold (`workspace.gold_core`):** 19 tabelas Delta gerenciadas: os 11 indicadores existentes e 8 métricas adicionais do dashboard do fornecedor, calculadas a partir da Silver.
+- **Bronze (`analytics.bronze_core`):** 25 entidades lidas de abas dos dois Excel no novo modo manual. A carga QA anterior veio de CSV; o serviço CoreDB → Bronze permanece como caminho anterior e exige cutover antes de publicar nos mesmos nomes.
+- **Silver (`analytics.silver`):** 24 tabelas Delta gerenciadas que selecionam campos, normalizam textos e status e preservam as chaves para relacionamentos. As regras ainda podem evoluir com o domínio.
+- **Gold (`analytics.gold`):** 19 tabelas Delta gerenciadas: os 11 indicadores existentes e 8 métricas adicionais do dashboard do fornecedor, calculadas a partir da Silver.
 
 As pipelines Silver e Gold anteriores foram criadas na interface do Databricks em modo **Triggered**. A definição atual neste repositório é um job com uma task de notebook Bronze → Silver → Gold e uma task posterior de exportação. Antes de executar, revise o serverless da conta e faça o cutover das views controladas pelas pipelines antigas no workspace. Remover os arquivos antigos do repositório não exclui essas pipelines do Databricks. Nada foi instalado ou executado nesta migração.
 

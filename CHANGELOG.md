@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.6.0](https://github.com/Solierrr/databricks-stocker/compare/v0.5.0...v0.6.0) (2026-10-23)
+
+
+### Features
+
+* add supplier KPIs and export job ([#10](https://github.com/Solierrr/databricks-stocker/issues/10)) ([02707cd](https://github.com/Solierrr/databricks-stocker/commit/02707cd32e876f1303cd4f9919f970aaa5975e58))
+* gold supplier kpis ([#12](https://github.com/Solierrr/databricks-stocker/issues/12)) ([1ebd0e5](https://github.com/Solierrr/databricks-stocker/commit/1ebd0e5dbcf425813c44b1d61f75d1a34840f29c))
+* gold supplier kpis ([#13](https://github.com/Solierrr/databricks-stocker/issues/13)) ([180d8ea](https://github.com/Solierrr/databricks-stocker/commit/180d8ea0426c0e3331a97b0773aa05ba3f6a1941))
+* manual ingestion .xlsx files ([#14](https://github.com/Solierrr/databricks-stocker/issues/14)) ([d6af70c](https://github.com/Solierrr/databricks-stocker/commit/d6af70cabfaf7f64c4ad16a61e9c9d025e83b756))
+
 ## [0.5.0](https://github.com/Solierrr/databricks-stocker/compare/v0.4.0...v0.5.0) (2026-10-18)
 
 

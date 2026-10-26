@@ -27,7 +27,7 @@ Bronze. Falta de aba ou coluna causa falha explícita.
 | Arquivo | Abas |
 |---|---|
 | `fornecedores.xlsx` | `brand`, `model`, `supplier`, `offer`, `inventory`, `proposal`, `proposal_item` |
-| `admins.xlsx` | `company`, `person`, `requester`, `technician`, `technician_affiliation`, `user_company`, `proposal_unit`, `local_unit`, `professional_review`, `project_activity`, `service_contract`, `service_executor`, `technical_project`, `technical_service`, `charge`, `company_plans`, `subscription`, `energy_bill` |
+| `admins.xlsx` | `company`, `person`, `requester`, `technician`, `technician_affiliation`, `user_company`, `proposal_unit`, `local_unit`, `professional_review`, `project_activity`, `service_contract`, `service_executor`, `technical_project`, `technical_service`, `charge`, `company_plan`, `subscription`, `energy_bill` |
 
 As 18 abas de admins incluem as fontes de demandante e profissional para
 preservar os 19 KPIs. As 7 abas de fornecedores incluem relações compartilhadas
@@ -35,10 +35,13 @@ com KPIs administrativos. IDs e FKs devem ser coerentes entre abas. Formate
 UUIDs como texto; datas, números e booleanos precisam ter tipos adequados no
 Excel. A leitura nativa exige Databricks Runtime 17.1 ou superior.
 
-O contrato foi derivado dos SQLs Silver existentes. O schema CoreDB versionado
-em `database-console/db/core/schema.sql` diverge em `brand`, `model.fk_brand`,
-`offer.commercial_status` e `proposal.fk_supplier`. Revise esses campos ao
-criar as planilhas. Os quatro indicadores condicionais de pedidos do documento
+Nomes de abas e colunas seguem o baseline renomeado do CoreDB (views do schema
+`export`): FKs como `<tabela>_id`, booleanos com `is_`/`has_`, datas com
+`_at`, `company_plan` no singular e `model_name`. Os arquivos em `recovery/`
+ainda usam os nomes anteriores e precisam ser regerados a partir das views
+`export` antes de uma execução. O catálogo é o parâmetro `catalog` do job
+(`analytics`; `analyticsqa` em QA), e os volumes dos caminhos devem pertencer
+a esse catálogo. Os quatro indicadores condicionais de pedidos do documento
 original não foram adicionados: não há essas entidades na Silver.
 
 ## Implantação e cutover
@@ -47,13 +50,14 @@ Se `my_transformation` falhar com `read_bronze() takes 3 positional arguments
 but 4 were given`, atualize **os dois** arquivos
 `transformations/my_transformation.py` e `transformations/note_bronze.py` no
 workspace. A versão atual passa o caminho do Excel como quarto argumento e
-`read_bronze` exige esse argumento. Reinicie a sessão Python do notebook antes de executar de
+`read_bronze` aceita esse argumento; chamadas antigas com três argumentos
+continuam válidas. Reinicie a sessão Python do notebook antes de executar de
 novo, pois módulos já importados podem permanecer em cache.
 
 1. Revise as duas planilhas e os caminhos, e disponibilize os quatro arquivos
    Python no mesmo diretório do workspace. Revise o runtime, o caminho do
    notebook no job e a configuração de execução serverless da conta.
-2. Provisione `workspace.gold_security.can_read_supplier` e o mapa de acesso
+2. Provisione `analytics.gold_security.can_read_supplier` e o mapa de acesso
    conforme `security/supplier_access.sql`. Conceda acesso ADMIN à identidade
    que executará o notebook e à identidade exportadora.
 3. Preserve snapshots das tabelas Bronze e das views Silver/Gold atuais.
