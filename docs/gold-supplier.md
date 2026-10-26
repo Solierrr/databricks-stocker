@@ -2,7 +2,7 @@
 
 As dez tabelas de fornecedor são calculadas em Python em
 `pipelines/00_medallion/transformations/note_gold.py`. Todas carregam `supplier_id` e aplicam
-`analytics.gold_security.can_read_supplier` como row filter na gravação da
+`workspace.gold_security.can_read_supplier` como row filter na gravação da
 tabela Delta. O filtro e seu mapa de identidades devem ser criados por
 `security/supplier_access.sql` antes da atualização da Gold. O mapa começa vazio;
 o usuário do job e o usuário que exporta para AnalyticsDB precisam de

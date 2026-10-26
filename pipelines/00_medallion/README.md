@@ -46,7 +46,15 @@ original não foram adicionados: não há essas entidades na Silver.
 
 ## Implantação e cutover
 
-1. Revise as duas planilhas e os caminhos, e disponibilize os cinco arquivos
+Se `my_transformation` falhar com `read_bronze() takes 3 positional arguments
+but 4 were given`, atualize **os dois** arquivos
+`transformations/my_transformation.py` e `transformations/note_bronze.py` no
+workspace. A versão atual passa o caminho do Excel como quarto argumento e
+`read_bronze` aceita esse argumento; chamadas antigas com três argumentos
+continuam válidas. Reinicie a sessão Python do notebook antes de executar de
+novo, pois módulos já importados podem permanecer em cache.
+
+1. Revise as duas planilhas e os caminhos, e disponibilize os quatro arquivos
    Python no mesmo diretório do workspace. Revise o runtime, o caminho do
    notebook no job e a configuração de execução serverless da conta.
 2. Provisione `analytics.gold_security.can_read_supplier` e o mapa de acesso
