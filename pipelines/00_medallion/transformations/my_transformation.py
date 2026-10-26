@@ -34,6 +34,20 @@ def _targets() -> list[str]:
     return bronze + silver + gold
 
 
+def _unsafe_existing_targets(names: list[str]) -> list[str]:
+    """Only resume automatically over ordinary managed Delta tables."""
+    unsafe = []
+    for name in names:
+        kind = spark.catalog.getTable(name).tableType.upper()
+        if kind != "MANAGED":
+            unsafe.append(f"{name} ({kind})")
+            continue
+        format_name = spark.sql(f"DESCRIBE DETAIL {name}").first()["format"].lower()
+        if format_name != "delta":
+            unsafe.append(f"{name} ({format_name})")
+    return unsafe
+
+
 def _write_table(name: str, frame, *, supplier_filter: bool = False) -> None:
     if supplier_filter:
         # The only SQL here is table DDL. All KPI calculations remain PySpark.
@@ -77,11 +91,13 @@ def run() -> None:
     targets = _targets()
     existing = [name for name in targets if spark.catalog.tableExists(name)]
     if existing and not allow_replace:
-        raise RuntimeError(
-            "Target objects already exist. Complete the cutover and explicitly set "
-            "allow_replace_existing=true before replacing managed Delta tables. "
-            f"Existing objects: {existing}"
-        )
+        unsafe = _unsafe_existing_targets(existing)
+        if unsafe:
+            raise RuntimeError(
+                "Existing targets include views or non-Delta tables. Complete the cutover "
+                "before replacing them; allow_replace_existing=true explicitly overrides "
+                f"this protection. Objects: {unsafe}"
+            )
 
     for workbook, sheets in SHEETS.items():
         for sheet, required in sheets.items():

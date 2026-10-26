@@ -68,9 +68,10 @@ novo, pois módulos já importados podem permanecer em cache.
    Desative as pipelines antigas e resolva a propriedade e os nomes de seus
    objetos antes da primeira execução. Não há conversão automática de uma view
    materializada controlada por pipeline para uma tabela Delta comum.
-4. O parâmetro `allow_replace_existing` começa em `false`; o notebook aborta
-   se algum dos 68 nomes já existir. Só use `true` após concluir o cutover e
-   revisar quais tabelas Delta comuns serão substituídas.
+4. O notebook retoma execuções anteriores quando os nomes existentes são
+   tabelas Delta gerenciadas comuns. Views e tabelas de outro formato continuam
+   bloqueadas; `allow_replace_existing=true` só deve ser usado após concluir o
+   cutover e revisar os objetos que serão substituídos.
 5. Instale o job e configure os segredos da task de exportação. Cada execução
    regrava as tabelas na ordem Bronze → Silver → Gold e então chama a API Gold.
 

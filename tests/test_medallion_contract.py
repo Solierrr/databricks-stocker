@@ -137,6 +137,28 @@ class NotebookContractTest(unittest.TestCase):
             unittest.mock.call("admins", "company", ("id",), "/Volumes/admins.xlsx"),
         ])
 
+        # A previous partial run leaves managed Delta targets behind. Rerunning
+        # must proceed, while a view with the same name remains protected.
+        spark.catalog.tableExists.return_value = True
+        spark.catalog.getTable.return_value.tableType = "MANAGED"
+        spark.sql.return_value.first.return_value = {"format": "delta"}
+        notebook["run"]()
+        self.assertGreater(bronze.read_bronze.call_count, 2)
+
+        spark.catalog.getTable.side_effect = lambda name: types.SimpleNamespace(
+            tableType="VIEW" if name.endswith(".offer") else "MANAGED"
+        )
+        previous_reads = bronze.read_bronze.call_count
+        with self.assertRaisesRegex(RuntimeError, "workspace|analytics.bronze_core.offer"):
+            notebook["run"]()
+        self.assertEqual(bronze.read_bronze.call_count, previous_reads)
+
+        spark.catalog.getTable.side_effect = None
+        spark.sql.return_value.first.return_value = {"format": "parquet"}
+        with self.assertRaisesRegex(RuntimeError, "parquet"):
+            notebook["run"]()
+        self.assertEqual(bronze.read_bronze.call_count, previous_reads)
+
 
 if __name__ == "__main__":
     unittest.main()
