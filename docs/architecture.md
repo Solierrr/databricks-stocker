@@ -6,4 +6,4 @@ No `databricks-stocker`, o notebook `pipelines/00_medallion/transformations/my_t
 
 A Gold fornece dados para a próxima etapa, mas nenhum dashboard da nova arquitetura foi implementado nesta branch. O filtro por fornecedor exige `security/supplier_access.sql` e vínculo explícito entre identidade e fornecedor.
 
-O exportador do `databricks-sync` copia as 19 tabelas Gold autorizadas para tabelas homônimas em `analyticsdb.analytics_gold`, com Row Level Security no PostgreSQL. É necessário provisionar o schema, o job, os segredos, os privilégios e os vínculos de identidade antes do uso real.
+O exportador do `databricks-sync` copia as 19 tabelas Gold autorizadas para tabelas homônimas em `analyticsdb.gold`, com Row Level Security no PostgreSQL. É necessário provisionar o schema, o job, os segredos, os privilégios e os vínculos de identidade antes do uso real.
