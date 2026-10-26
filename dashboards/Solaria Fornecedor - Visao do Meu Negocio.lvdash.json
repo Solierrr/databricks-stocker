@@ -1,0 +1,1794 @@
+{
+  "datasets": [
+    {
+      "name": "780e2970",
+      "displayName": "kpi_supplier_accepted_offers_by_date",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.gold.kpi_supplier_accepted_offers_by_date",
+        "dimensions": [
+          {
+            "name": "supplier_id",
+            "expr": "supplier_id"
+          },
+          {
+            "name": "offer_id",
+            "expr": "offer_id"
+          },
+          {
+            "name": "model_id",
+            "expr": "model_id"
+          },
+          {
+            "name": "proposal_created_date_proxy",
+            "expr": "proposal_created_date_proxy"
+          },
+          {
+            "name": "accepted_proposals",
+            "expr": "accepted_proposals"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ce741283",
+      "displayName": "kpi_supplier_accepted_value_by_model",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.gold.kpi_supplier_accepted_value_by_model",
+        "dimensions": [
+          {
+            "name": "supplier_id",
+            "expr": "supplier_id"
+          },
+          {
+            "name": "model_id",
+            "expr": "model_id"
+          },
+          {
+            "name": "brand_name",
+            "expr": "brand_name"
+          },
+          {
+            "name": "model_name",
+            "expr": "model_name"
+          },
+          {
+            "name": "accepted_negotiated_value",
+            "expr": "accepted_negotiated_value"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "fc68d122",
+      "displayName": "kpi_supplier_accepted_value_by_month",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.gold.kpi_supplier_accepted_value_by_month",
+        "dimensions": [
+          {
+            "name": "supplier_id",
+            "expr": "supplier_id"
+          },
+          {
+            "name": "proposal_created_month_proxy",
+            "expr": "proposal_created_month_proxy",
+            "format": {
+              "type": "date",
+              "dateFormat": "locale_short_month"
+            }
+          },
+          {
+            "name": "accepted_negotiated_value",
+            "expr": "accepted_negotiated_value",
+            "format": {
+              "type": "currency",
+              "currencyCode": "BRL",
+              "decimalPlaces": {
+                "type": "exact",
+                "places": 2.0
+              }
+            }
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all rows",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "71153a2e",
+      "displayName": "kpi_supplier_offer_details",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.gold.kpi_supplier_offer_details",
+        "dimensions": [
+          {
+            "name": "supplier_id",
+            "expr": "supplier_id"
+          },
+          {
+            "name": "offer_id",
+            "expr": "offer_id"
+          },
+          {
+            "name": "model_id",
+            "expr": "model_id"
+          },
+          {
+            "name": "brand_name",
+            "expr": "brand_name"
+          },
+          {
+            "name": "model_name",
+            "expr": "model_name"
+          },
+          {
+            "name": "unit_price",
+            "expr": "unit_price"
+          },
+          {
+            "name": "availability",
+            "expr": "availability"
+          },
+          {
+            "name": "expires_at",
+            "expr": "expires_at"
+          },
+          {
+            "name": "commercial_status",
+            "expr": "commercial_status"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "65b6d96c",
+      "displayName": "kpi_supplier_offers_by_status",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.gold.kpi_supplier_offers_by_status",
+        "dimensions": [
+          {
+            "name": "supplier_id",
+            "expr": "supplier_id"
+          },
+          {
+            "name": "commercial_status",
+            "expr": "commercial_status"
+          },
+          {
+            "name": "offer_count",
+            "expr": "offer_count"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dd6bb8e9",
+      "displayName": "kpi_supplier_offers_summary",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.gold.kpi_supplier_offers_summary",
+        "dimensions": [
+          {
+            "name": "supplier_id",
+            "expr": "supplier_id"
+          },
+          {
+            "name": "reference_date",
+            "expr": "reference_date"
+          },
+          {
+            "name": "registered_offers",
+            "expr": "registered_offers"
+          },
+          {
+            "name": "active_offers",
+            "expr": "active_offers"
+          },
+          {
+            "name": "avg_listed_price",
+            "expr": "avg_listed_price"
+          },
+          {
+            "name": "avg_active_listed_price",
+            "expr": "avg_active_listed_price"
+          },
+          {
+            "name": "listed_availability",
+            "expr": "listed_availability"
+          },
+          {
+            "name": "expired_offers",
+            "expr": "expired_offers"
+          },
+          {
+            "name": "offers_expiring_in_30_days",
+            "expr": "offers_expiring_in_30_days"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "bcc8fd7d",
+      "displayName": "kpi_supplier_proposals_by_status",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.gold.kpi_supplier_proposals_by_status",
+        "dimensions": [
+          {
+            "name": "supplier_id",
+            "expr": "supplier_id"
+          },
+          {
+            "name": "proposal_status",
+            "expr": "proposal_status"
+          },
+          {
+            "name": "received_proposals",
+            "expr": "received_proposals"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "55c17e6e",
+      "displayName": "kpi_supplier_proposals_summary",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.gold.kpi_supplier_proposals_summary",
+        "dimensions": [
+          {
+            "name": "supplier_id",
+            "expr": "supplier_id"
+          },
+          {
+            "name": "open_received_proposals",
+            "expr": "open_received_proposals"
+          },
+          {
+            "name": "accepted_proposals",
+            "expr": "accepted_proposals"
+          },
+          {
+            "name": "closed_proposals",
+            "expr": "closed_proposals"
+          },
+          {
+            "name": "closed_acceptance_rate_pct",
+            "expr": "closed_acceptance_rate_pct"
+          },
+          {
+            "name": "accepted_items_without_price",
+            "expr": "accepted_items_without_price"
+          },
+          {
+            "name": "accepted_items_price_coverage_pct",
+            "expr": "accepted_items_price_coverage_pct"
+          },
+          {
+            "name": "accepted_negotiated_value",
+            "expr": "accepted_negotiated_value"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "5c0992b4",
+      "displayName": "kpi_supplier_stock_by_model",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.gold.kpi_supplier_stock_by_model",
+        "dimensions": [
+          {
+            "name": "supplier_id",
+            "expr": "supplier_id"
+          },
+          {
+            "name": "model_id",
+            "expr": "model_id"
+          },
+          {
+            "name": "model_name",
+            "expr": "model_name"
+          },
+          {
+            "name": "brand_name",
+            "expr": "brand_name"
+          },
+          {
+            "name": "stock_units",
+            "expr": "stock_units"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "cef40244",
+      "displayName": "kpi_supplier_stock_summary",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.gold.kpi_supplier_stock_summary",
+        "dimensions": [
+          {
+            "name": "supplier_id",
+            "expr": "supplier_id"
+          },
+          {
+            "name": "stock_units",
+            "expr": "stock_units"
+          },
+          {
+            "name": "models_in_stock",
+            "expr": "models_in_stock"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    }
+  ],
+  "pages": [
+    {
+      "name": "page_supplier_business",
+      "displayName": "Meu negócio",
+      "layout": [
+        {
+          "widget": {
+            "name": "supplier_header",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<span style=\"font-size:24px;\"><b>Solaria | Meu negócio</b></span><br><span style=\"font-size:13px;\">Ofertas, estoque, propostas recebidas e valor negociado aceito do fornecedor autenticado. Métricas conforme as 10 tabelas Gold de fornecedor do repositório.</span>"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "commercial_heading",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<span style=\"font-size:18px;\"><b>Oferta comercial e estoque</b></span>"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "offers_registered",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "dd6bb8e9",
+                  "fields": [
+                    {
+                      "name": "offers_registered",
+                      "expression": "SUM(`registered_offers`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "offers_registered"
+                }
+              },
+              "version": 2,
+              "frame": {
+                "title": {
+                  "value": "Ofertas cadastradas",
+                  "fields": []
+                },
+                "showTitle": true
+              },
+              "allowHTMLByDefault": false,
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 3,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "offers_active",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "dd6bb8e9",
+                  "fields": [
+                    {
+                      "name": "offers_active",
+                      "expression": "SUM(`active_offers`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "offers_active"
+                }
+              },
+              "version": 2,
+              "frame": {
+                "title": {
+                  "value": "Ofertas ativas e válidas",
+                  "fields": []
+                },
+                "showTitle": true
+              },
+              "allowHTMLByDefault": false,
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 3,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "offers_expired",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "dd6bb8e9",
+                  "fields": [
+                    {
+                      "name": "offers_expired",
+                      "expression": "SUM(`expired_offers`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "offers_expired"
+                }
+              },
+              "version": 2,
+              "frame": {
+                "title": {
+                  "value": "Ofertas com validade expirada",
+                  "fields": []
+                },
+                "showTitle": true
+              },
+              "allowHTMLByDefault": false,
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 3,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "offers_expiring",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "dd6bb8e9",
+                  "fields": [
+                    {
+                      "name": "offers_expiring",
+                      "expression": "SUM(`offers_expiring_in_30_days`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "offers_expiring"
+                }
+              },
+              "version": 2,
+              "frame": {
+                "title": {
+                  "value": "Ofertas que vencem em até 30 dias",
+                  "fields": []
+                },
+                "showTitle": true
+              },
+              "allowHTMLByDefault": false,
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 3,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "listed_availability",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "dd6bb8e9",
+                  "fields": [
+                    {
+                      "name": "listed_availability",
+                      "expression": "SUM(`listed_availability`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "listed_availability"
+                }
+              },
+              "version": 2,
+              "frame": {
+                "title": {
+                  "value": "Disponibilidade anunciada (un.)",
+                  "fields": []
+                },
+                "showTitle": true
+              },
+              "allowHTMLByDefault": false,
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 5,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "stock_units",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "cef40244",
+                  "fields": [
+                    {
+                      "name": "stock_units",
+                      "expression": "SUM(`stock_units`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "stock_units"
+                }
+              },
+              "version": 2,
+              "frame": {
+                "title": {
+                  "value": "Estoque físico (un.)",
+                  "fields": []
+                },
+                "showTitle": true
+              },
+              "allowHTMLByDefault": false,
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 5,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "models_in_stock",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "cef40244",
+                  "fields": [
+                    {
+                      "name": "models_in_stock",
+                      "expression": "SUM(`models_in_stock`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "models_in_stock"
+                }
+              },
+              "version": 2,
+              "frame": {
+                "title": {
+                  "value": "Modelos com estoque positivo",
+                  "fields": []
+                },
+                "showTitle": true
+              },
+              "allowHTMLByDefault": false,
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 5,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "average_active_price",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "dd6bb8e9",
+                  "fields": [
+                    {
+                      "name": "average_active_price",
+                      "expression": "AVG(`avg_active_listed_price`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "average_active_price"
+                }
+              },
+              "version": 2,
+              "frame": {
+                "title": {
+                  "value": "Preço médio das ofertas ativas (R$)",
+                  "fields": []
+                },
+                "showTitle": true
+              },
+              "allowHTMLByDefault": false,
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 5,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "commercial_note",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<span style=\"font-size:12px;\">Oferta ativa exige status ACTIVE e validade não expirada. Disponibilidade anunciada é diferente de estoque físico. Preço médio é por oferta, não preço de venda.</span>"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 7,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "offer_status_chart",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "65b6d96c",
+                  "fields": [
+                    {
+                      "name": "commercial_status",
+                      "expression": "`commercial_status`"
+                    },
+                    {
+                      "name": "offers",
+                      "expression": "SUM(`offer_count`)"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "commercial_status",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "Situação"
+                },
+                "y": {
+                  "fieldName": "offers",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Ofertas"
+                }
+              },
+              "version": 3,
+              "frame": {
+                "title": {
+                  "value": "Ofertas por status comercial",
+                  "fields": []
+                },
+                "showTitle": true
+              },
+              "allowHTMLByDefault": false,
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 8,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "stock_brand_chart",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "5c0992b4",
+                  "fields": [
+                    {
+                      "name": "brand_name",
+                      "expression": "`brand_name`"
+                    },
+                    {
+                      "name": "units",
+                      "expression": "SUM(`stock_units`)"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "brand_name",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "Marca"
+                },
+                "y": {
+                  "fieldName": "units",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Unidades"
+                }
+              },
+              "version": 3,
+              "frame": {
+                "title": {
+                  "value": "Estoque físico por marca",
+                  "fields": []
+                },
+                "showTitle": true
+              },
+              "allowHTMLByDefault": false,
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 8,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "proposal_heading",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<span style=\"font-size:18px;\"><b>Propostas e negociação</b></span>"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 14,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "proposals_open",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "55c17e6e",
+                  "fields": [
+                    {
+                      "name": "proposals_open",
+                      "expression": "SUM(`open_received_proposals`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "proposals_open"
+                }
+              },
+              "version": 2,
+              "frame": {
+                "title": {
+                  "value": "Propostas recebidas em aberto",
+                  "fields": []
+                },
+                "showTitle": true
+              },
+              "allowHTMLByDefault": false,
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 15,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "proposals_accepted",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "55c17e6e",
+                  "fields": [
+                    {
+                      "name": "proposals_accepted",
+                      "expression": "SUM(`accepted_proposals`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "proposals_accepted"
+                }
+              },
+              "version": 2,
+              "frame": {
+                "title": {
+                  "value": "Propostas aceitas",
+                  "fields": []
+                },
+                "showTitle": true
+              },
+              "allowHTMLByDefault": false,
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 15,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "acceptance_rate",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "55c17e6e",
+                  "fields": [
+                    {
+                      "name": "acceptance_rate",
+                      "expression": "AVG(`closed_acceptance_rate_pct`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "acceptance_rate"
+                }
+              },
+              "version": 2,
+              "frame": {
+                "title": {
+                  "value": "Aceite entre propostas encerradas (%)",
+                  "fields": []
+                },
+                "showTitle": true
+              },
+              "allowHTMLByDefault": false,
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 15,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "accepted_value",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "55c17e6e",
+                  "fields": [
+                    {
+                      "name": "accepted_value",
+                      "expression": "SUM(`accepted_negotiated_value`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "accepted_value"
+                }
+              },
+              "version": 2,
+              "frame": {
+                "title": {
+                  "value": "Valor negociado aceito (R$)",
+                  "fields": []
+                },
+                "showTitle": true
+              },
+              "allowHTMLByDefault": false,
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 15,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "unpriced_items",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "55c17e6e",
+                  "fields": [
+                    {
+                      "name": "unpriced_items",
+                      "expression": "SUM(`accepted_items_without_price`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "unpriced_items"
+                }
+              },
+              "version": 2,
+              "frame": {
+                "title": {
+                  "value": "Itens aceitos sem preço",
+                  "fields": []
+                },
+                "showTitle": true
+              },
+              "allowHTMLByDefault": false,
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 17,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "price_coverage",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "55c17e6e",
+                  "fields": [
+                    {
+                      "name": "price_coverage",
+                      "expression": "AVG(`accepted_items_price_coverage_pct`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "price_coverage"
+                }
+              },
+              "version": 2,
+              "frame": {
+                "title": {
+                  "value": "Cobertura de preço dos itens aceitos (%)",
+                  "fields": []
+                },
+                "showTitle": true
+              },
+              "allowHTMLByDefault": false,
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 17,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "closed_proposals",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "55c17e6e",
+                  "fields": [
+                    {
+                      "name": "closed_proposals",
+                      "expression": "SUM(`closed_proposals`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "closed_proposals"
+                }
+              },
+              "version": 2,
+              "frame": {
+                "title": {
+                  "value": "Propostas encerradas",
+                  "fields": []
+                },
+                "showTitle": true
+              },
+              "allowHTMLByDefault": false,
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 17,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "offers_with_acceptance",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "780e2970",
+                  "fields": [
+                    {
+                      "name": "offers_with_acceptance",
+                      "expression": "COUNT(DISTINCT `offer_id`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "offers_with_acceptance"
+                }
+              },
+              "version": 2,
+              "frame": {
+                "title": {
+                  "value": "Ofertas com proposta aceita",
+                  "fields": []
+                },
+                "showTitle": true
+              },
+              "allowHTMLByDefault": false,
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 17,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "proposal_note",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<span style=\"font-size:12px;\">Valor aceito = preço unitário negociado × quantidade; é negociação, não TPV nem pagamento recebido. Itens sem preço não entram no valor, por isso a cobertura aparece ao lado.</span>"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 19,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "proposal_status_chart",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "bcc8fd7d",
+                  "fields": [
+                    {
+                      "name": "proposal_status",
+                      "expression": "`proposal_status`"
+                    },
+                    {
+                      "name": "proposals",
+                      "expression": "SUM(`received_proposals`)"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "proposal_status",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "Status"
+                },
+                "y": {
+                  "fieldName": "proposals",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Propostas"
+                }
+              },
+              "version": 3,
+              "frame": {
+                "title": {
+                  "value": "Propostas recebidas por status",
+                  "fields": []
+                },
+                "showTitle": true
+              },
+              "allowHTMLByDefault": false,
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 20,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "accepted_model_chart",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ce741283",
+                  "fields": [
+                    {
+                      "name": "model_label",
+                      "expression": "CONCAT(COALESCE(`brand_name`, ''), ' / ', COALESCE(`model_name`, ''), ' [', CAST(`model_id` AS STRING), ']')"
+                    },
+                    {
+                      "name": "negotiated_value",
+                      "expression": "SUM(`accepted_negotiated_value`)"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "model_label",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "Produto"
+                },
+                "y": {
+                  "fieldName": "negotiated_value",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Valor negociado (R$)"
+                }
+              },
+              "version": 3,
+              "frame": {
+                "title": {
+                  "value": "Valor negociado aceito por produto",
+                  "fields": []
+                },
+                "showTitle": true
+              },
+              "allowHTMLByDefault": false,
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 20,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "accepted_month_chart",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fc68d122",
+                  "fields": [
+                    {
+                      "name": "monthly(proposal_created_month_proxy)",
+                      "expression": "DATE_TRUNC(\"MONTH\", `proposal_created_month_proxy`)"
+                    },
+                    {
+                      "name": "sum(accepted_negotiated_value)",
+                      "expression": "SUM(`accepted_negotiated_value`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Valor aceito por mês de criação da proposta",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "monthly(proposal_created_month_proxy)",
+                  "displayName": "Mês de criação",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(accepted_negotiated_value)",
+                  "displayName": "Valor negociado (R$)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 26,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "time_note",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<span style=\"font-size:12px;\">A linha mensal agrupa propostas atualmente aceitas pela data em que foram criadas. Não representa a data real do aceite, pois essa data não existe na Gold atual.</span>"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 32,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "detail_heading",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<span style=\"font-size:18px;\"><b>Detalhamento para decisão</b></span>"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 33,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "offer_detail_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "71153a2e",
+                  "fields": [
+                    {
+                      "name": "offer_id",
+                      "expression": "`offer_id`"
+                    },
+                    {
+                      "name": "model_name",
+                      "expression": "`model_name`"
+                    },
+                    {
+                      "name": "brand_name",
+                      "expression": "`brand_name`"
+                    },
+                    {
+                      "name": "unit_price",
+                      "expression": "`unit_price`"
+                    },
+                    {
+                      "name": "availability",
+                      "expression": "`availability`"
+                    },
+                    {
+                      "name": "expires_at",
+                      "expression": "`expires_at`"
+                    },
+                    {
+                      "name": "commercial_status",
+                      "expression": "`commercial_status`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Detalhamento das ofertas"
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "offer_id"
+                  },
+                  {
+                    "fieldName": "model_name"
+                  },
+                  {
+                    "fieldName": "brand_name"
+                  },
+                  {
+                    "fieldName": "unit_price"
+                  },
+                  {
+                    "fieldName": "availability"
+                  },
+                  {
+                    "fieldName": "expires_at"
+                  },
+                  {
+                    "fieldName": "commercial_status"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 34,
+            "width": 12,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "stock_detail_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "5c0992b4",
+                  "fields": [
+                    {
+                      "name": "model_name",
+                      "expression": "`model_name`"
+                    },
+                    {
+                      "name": "brand_name",
+                      "expression": "`brand_name`"
+                    },
+                    {
+                      "name": "stock_units",
+                      "expression": "`stock_units`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Estoque por modelo"
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "model_name"
+                  },
+                  {
+                    "fieldName": "brand_name"
+                  },
+                  {
+                    "fieldName": "stock_units"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 42,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "accepted_detail_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ce741283",
+                  "fields": [
+                    {
+                      "name": "model_name",
+                      "expression": "`model_name`"
+                    },
+                    {
+                      "name": "brand_name",
+                      "expression": "`brand_name`"
+                    },
+                    {
+                      "name": "accepted_negotiated_value",
+                      "expression": "`accepted_negotiated_value`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Valor aceito por modelo"
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "model_name"
+                  },
+                  {
+                    "fieldName": "brand_name"
+                  },
+                  {
+                    "fieldName": "accepted_negotiated_value"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 42,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "security_note",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<span style=\"font-size:13px;\"><b>Acesso:</b> as tabelas Gold de fornecedor devem manter o row filter can_read_supplier(supplier_id) e o vínculo SUPPLIER validado para o usuário autenticado. O filtro visual não substitui essa política. Catálogo implantado: <b>workspace.gold</b> (o repositório define analytics como padrão; os datasets locais apontam para o catálogo implantado).</span>"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 49,
+            "width": 12,
+            "height": 3
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}

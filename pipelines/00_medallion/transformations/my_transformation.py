@@ -1,4 +1,8 @@
 # Databricks notebook source
+# /// script
+# [tool.databricks.environment]
+# environment_version = "6"
+# ///
 """One notebook job: Excel -> Bronze -> Silver -> Gold managed Delta tables.
 
 Run only after the old pipeline-owned objects have been migrated. This module
@@ -10,7 +14,7 @@ import re
 from databricks.sdk.runtime import dbutils, spark
 
 from note_bronze import SHEETS, read_bronze
-from note_catalog import BRONZE, CATALOG_KEY, DEFAULT_CATALOG, GOLD, SILVER, catalog, table
+from note_catalog import BRONZE, DEFAULT_CATALOG, GOLD, SILVER, catalog, set_catalog, table
 from note_gold import GOLD_BUILDERS, SUPPLIER_TABLES, supplier_filter_name
 from note_silver import SPECS, silver_frame
 
@@ -32,6 +36,20 @@ def _targets() -> list[str]:
     silver = [table(SILVER, name) for name in (*SPECS, "technicians")]
     gold = [table(GOLD, name) for name in GOLD_BUILDERS]
     return bronze + silver + gold
+
+
+def _unsafe_existing_targets(names: list[str]) -> list[str]:
+    """Only resume automatically over ordinary managed Delta tables."""
+    unsafe = []
+    for name in names:
+        kind = spark.catalog.getTable(name).tableType.upper()
+        if kind != "MANAGED":
+            unsafe.append(f"{name} ({kind})")
+            continue
+        format_name = spark.sql(f"DESCRIBE DETAIL {name}").first()["format"].lower()
+        if format_name != "delta":
+            unsafe.append(f"{name} ({format_name})")
+    return unsafe
 
 
 def _write_table(name: str, frame, *, supplier_filter: bool = False) -> None:
@@ -58,12 +76,16 @@ def _write_table(name: str, frame, *, supplier_filter: bool = False) -> None:
 
 
 def run() -> None:
-    spark.conf.set(CATALOG_KEY, _catalog_parameter())
+    set_catalog(_catalog_parameter())
     source_mode = _parameter("source_mode", "manual").lower()
     if source_mode != "manual":
         raise ValueError("Only source_mode=manual is implemented; automatic CoreDB ingestion is not configured")
 
     source_paths = {
+
+
+
+
         "fornecedores": _parameter("fornecedores_path", f"/Volumes/{catalog()}/{BRONZE}/manual_ingestion/fornecedores.xlsx"),
         "admins": _parameter("admins_path", f"/Volumes/{catalog()}/{BRONZE}/manual_ingestion/admins.xlsx"),
     }
@@ -71,24 +93,31 @@ def run() -> None:
     if not all(source_paths.values()):
         raise ValueError("Both workbook paths are required")
 
+    for schema in (SILVER, GOLD):
+        spark.sql(f"CREATE SCHEMA IF NOT EXISTS {catalog()}.{schema}")
+
     targets = _targets()
     existing = [name for name in targets if spark.catalog.tableExists(name)]
     if existing and not allow_replace:
-        raise RuntimeError(
-            "Target objects already exist. Complete the cutover and explicitly set "
-            "allow_replace_existing=true before replacing managed Delta tables. "
-            f"Existing objects: {existing}"
-        )
+        unsafe = _unsafe_existing_targets(existing)
+        if unsafe:
+            raise RuntimeError(
+                "Existing targets include views or non-Delta tables. Complete the cutover "
+                "before replacing them; allow_replace_existing=true explicitly overrides "
+                f"this protection. Objects: {unsafe}"
+            )
 
     for workbook, sheets in SHEETS.items():
         for sheet, required in sheets.items():
             _write_table(
-                f"workspace.bronze_core.{sheet}",
+                table(BRONZE, sheet),
                 read_bronze(workbook, sheet, required, source_paths[workbook]),
             )
 
-    for name in (*SPECS, "technicians"):
-        _write_table(table(SILVER, name), silver_frame(name))
+    # Validate every Bronze source before publishing any Silver table.
+    silver_frames = [(name, silver_frame(name)) for name in (*SPECS, "technicians")]
+    for name, frame in silver_frames:
+        _write_table(table(SILVER, name), frame)
 
     for name, build in GOLD_BUILDERS.items():
         _write_table(
