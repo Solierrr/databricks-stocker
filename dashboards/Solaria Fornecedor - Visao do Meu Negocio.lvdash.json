@@ -1787,7 +1787,35 @@
   ],
   "uiSettings": {
     "theme": {
-      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+      "canvasBackgroundColor": {
+        "light": "#FAFAFB",
+        "dark": "#1F272D"
+      },
+      "widgetBackgroundColor": {
+        "light": "#FFFFFF",
+        "dark": "#11171C"
+      },
+      "fontColor": {
+        "light": "#11171C",
+        "dark": "#E8ECF0"
+      },
+      "selectionColor": {
+        "light": "#2272B4",
+        "dark": "#8ACAFF"
+      },
+      "visualizationColors": [
+        "#B47C0A",
+        "#FFAB00",
+        "#FFC64F",
+        "#E7911D",
+        "#E77012",
+        "#F8964B",
+        "#FF7900",
+        "#B04200",
+        "#CF5B00",
+        "#FFB77F"
+      ],
+      "widgetHeaderAlignment": "LEFT"
     },
     "applyModeEnabled": false
   }
