@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/Solierrr/databricks-stocker/compare/v0.7.0...v0.8.0) (2026-10-26)
+
+
+### Features
+
+* uploading dashboards ([#18](https://github.com/Solierrr/databricks-stocker/issues/18)) ([6bbd31a](https://github.com/Solierrr/databricks-stocker/commit/6bbd31aaf9666e6d056a6bd2bfda6c2893e7af74))
+
 ## [0.7.0](https://github.com/Solierrr/databricks-stocker/compare/v0.6.0...v0.7.0) (2026-10-26)
 
 
