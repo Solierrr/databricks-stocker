@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.8.0](https://github.com/Solierrr/databricks-stocker/compare/v0.7.0...v0.8.0) (2026-10-26)
+
+
+### Features
+
+* uploading dashboards ([#18](https://github.com/Solierrr/databricks-stocker/issues/18)) ([6bbd31a](https://github.com/Solierrr/databricks-stocker/commit/6bbd31aaf9666e6d056a6bd2bfda6c2893e7af74))
+
+## [0.7.0](https://github.com/Solierrr/databricks-stocker/compare/v0.6.0...v0.7.0) (2026-10-26)
+
+
+### Features
+
+* gold supplier kpis ([#16](https://github.com/Solierrr/databricks-stocker/issues/16)) ([d92f7b1](https://github.com/Solierrr/databricks-stocker/commit/d92f7b1e49afa73acd6054bdec38008ce7badaaa))
+
 ## [0.6.0](https://github.com/Solierrr/databricks-stocker/compare/v0.5.0...v0.6.0) (2026-10-23)
 
 
