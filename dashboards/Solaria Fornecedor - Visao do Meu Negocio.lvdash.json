@@ -1787,7 +1787,6 @@
   ],
   "uiSettings": {
     "theme": {
-
       "canvasBackgroundColor": {
         "light": "#FAFAFB",
         "dark": "#1F272D"
@@ -1817,7 +1816,6 @@
         "#FFB77F"
       ],
       "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
-
     },
     "applyModeEnabled": false
   }
