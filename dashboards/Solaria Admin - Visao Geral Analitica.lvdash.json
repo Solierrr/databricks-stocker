@@ -18,6 +18,12 @@
         ],
         "measures": [
           {
+            "name": "total_models",
+            "expr": "SUM(model_count)",
+            "comment": "Sum of model_count across statuses",
+            "displayName": "Total de modelos"
+          },
+          {
             "name": "count",
             "expr": "COUNT(*)",
             "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
@@ -48,6 +54,12 @@
             "expr": "SUM(CASE WHEN proposal_status = 'ACCEPTED' THEN proposal_count ELSE 0 END) / NULLIF(SUM(CASE WHEN proposal_status IN ('ACCEPTED', 'REJECTED', 'CANCELED') THEN proposal_count ELSE 0 END), 0) * 100.0",
             "comment": "Percent of closed proposals (accepted, rejected or canceled) that were accepted",
             "displayName": "Aceite das propostas encerradas (%)"
+          },
+          {
+            "name": "total_proposals",
+            "expr": "SUM(proposal_count)",
+            "comment": "Sum of proposal_count across statuses",
+            "displayName": "Total de propostas"
           },
           {
             "name": "count",
@@ -156,6 +168,12 @@
         ],
         "measures": [
           {
+            "name": "total_service_assignments",
+            "expr": "SUM(service_count)",
+            "comment": "Sum of service_count across statuses",
+            "displayName": "Total de atribuicoes"
+          },
+          {
             "name": "count",
             "expr": "COUNT(*)",
             "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
@@ -208,6 +226,12 @@
             "displayName": "Vinculos ativos"
           },
           {
+            "name": "total_affiliations",
+            "expr": "COUNT(DISTINCT affiliation_id)",
+            "comment": "Distinct professional affiliations regardless of status",
+            "displayName": "Total de vinculos"
+          },
+          {
             "name": "count",
             "expr": "COUNT(*)",
             "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
@@ -237,6 +261,12 @@
           }
         ],
         "measures": [
+          {
+            "name": "total_projects",
+            "expr": "SUM(project_count)",
+            "comment": "Sum of project_count across statuses",
+            "displayName": "Total de projetos"
+          },
           {
             "name": "count",
             "expr": "COUNT(*)",
@@ -400,6 +430,12 @@
         ],
         "measures": [
           {
+            "name": "total_accepted_value",
+            "expr": "SUM(accepted_negotiated_value)",
+            "comment": "Sum of accepted_negotiated_value by model",
+            "displayName": "Valor negociado aceito total"
+          },
+          {
             "name": "count",
             "expr": "COUNT(*)",
             "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
@@ -429,6 +465,12 @@
           }
         ],
         "measures": [
+          {
+            "name": "total_accepted_value",
+            "expr": "SUM(accepted_negotiated_value)",
+            "comment": "Sum of accepted_negotiated_value",
+            "displayName": "Valor negociado aceito total"
+          },
           {
             "name": "count",
             "expr": "COUNT(*)",
@@ -490,6 +532,12 @@
             "displayName": "Preco medio anunciado ativo"
           },
           {
+            "name": "total_availability",
+            "expr": "SUM(availability)",
+            "comment": "Sum of listed availability units",
+            "displayName": "Disponibilidade anunciada total"
+          },
+          {
             "name": "count",
             "expr": "COUNT(*)",
             "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
@@ -519,6 +567,12 @@
           }
         ],
         "measures": [
+          {
+            "name": "total_offers",
+            "expr": "SUM(offer_count)",
+            "comment": "Sum of offer_count across statuses",
+            "displayName": "Total de ofertas"
+          },
           {
             "name": "count",
             "expr": "COUNT(*)",
@@ -616,6 +670,12 @@
         ],
         "measures": [
           {
+            "name": "total_participations",
+            "expr": "SUM(received_proposals)",
+            "comment": "Sum of received_proposals across statuses",
+            "displayName": "Total de participacoes"
+          },
+          {
             "name": "count",
             "expr": "COUNT(*)",
             "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
@@ -709,6 +769,12 @@
           }
         ],
         "measures": [
+          {
+            "name": "total_stock_units",
+            "expr": "SUM(stock_units)",
+            "comment": "Sum of stock_units",
+            "displayName": "Unidades de estoque totais"
+          },
           {
             "name": "count",
             "expr": "COUNT(*)",
@@ -2230,7 +2296,7 @@
             "name": "negotiation_scope",
             "multilineTextboxSpec": {
               "lines": [
-                "<span style=\"font-size:12px;\">Propostas únicas usam a Gold administrativa. Participações por fornecedor podem contar a mesma proposta em mais de uma empresa. Valor aceito é preço negociado × quantidade, não TPV, receita ou pagamento recebido. A cobertura de preço indica possíveis valores ausentes.</span>"
+                "<span style=\"font-size:12px\">Propostas únicas usam a Gold administrativa. Participações por fornecedor podem contar a mesma proposta em mais de uma empresa. Valor aceito é preço negociado × quantidade, não TPV, receita ou pagamento recebido. A cobertura de preço indica possíveis valores ausentes.</span>"
               ]
             }
           },
