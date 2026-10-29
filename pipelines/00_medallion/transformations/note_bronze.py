@@ -1,13 +1,14 @@
-"""Manual Excel ingestion for the Bronze -> Silver -> Gold notebook job.
+"""Ingestão manual de Excel para o job Bronze -> Silver -> Gold.
 
-Each workbook has one sheet per source entity. Upload both files to a Unity
-Catalog volume and set the paths in the job notebook parameters. The Excel
-reader is built into Databricks Runtime 17.1+.
+Cada planilha contém uma aba por entidade de origem. Envie os dois arquivos
+para um volume do Unity Catalog e configure os caminhos nos parâmetros do job.
+O leitor de Excel está disponível no Databricks Runtime 17.1 ou superior.
 """
 
 from databricks.sdk.runtime import spark
 
 
+# Abas esperadas e colunas obrigatórias de cada planilha.
 SHEETS = {
     "fornecedores": {
         "brand": ("id", "owner_company_id", "name", "normalized_name", "visibility", "is_archived", "is_legacy", "created_at", "updated_at"),
@@ -40,8 +41,8 @@ SHEETS = {
     },
 }
 
-# The recovery workbooks use the original CoreDB headers. Bronze publishes the
-# canonical names consumed by Silver, while retaining all other source columns.
+# As planilhas de recuperação usam os cabeçalhos originais do CoreDB. A Bronze
+# publica os nomes usados pela Silver e mantém as demais colunas de origem.
 SOURCE_SHEETS = {"company_plan": "company_plans"}
 COLUMN_ALIASES = {
     "brand": {"fk_owner_company": "owner_company_id", "archived": "is_archived", "legacy": "is_legacy"},
@@ -74,8 +75,10 @@ COLUMN_ALIASES = {
 def read_bronze(
     workbook: str, sheet: str, required: tuple[str, ...], path: str
 ):
+    # Validando o caminho da planilha.
     if not path:
         raise ValueError(f"Set a path for {workbook}.xlsx")
+    # Lendo a aba do Excel com cabeçalho.
     frame = (
         spark.read.format("excel")
         .option("headerRows", 1)
@@ -83,11 +86,13 @@ def read_bronze(
         .option("ignoreMissingSheet", "false")
         .load(path)
     )
+    # Padronizando nomes antigos de colunas.
     aliases = {
         source: target for source, target in COLUMN_ALIASES.get(sheet, {}).items()
         if source in frame.columns and target not in frame.columns
     }
     columns = [aliases.get(column, column) for column in frame.columns]
+    # Verificando as colunas obrigatórias.
     missing = sorted(set(required) - set(columns))
     if missing:
         raise ValueError(f"{workbook}.xlsx / {sheet}: missing columns {missing}")

@@ -1,3 +1,4 @@
+# Catálogo padrão e schemas usados pelo fluxo.
 DEFAULT_CATALOG = "workspace"
 
 BRONZE = "bronze_core"
@@ -8,6 +9,7 @@ SECURITY = "gold_security"
 _catalog = DEFAULT_CATALOG
 
 
+# Alterando o catálogo usado nos nomes das tabelas.
 def set_catalog(name: str) -> None:
     global _catalog
     _catalog = name

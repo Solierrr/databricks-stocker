@@ -1,8 +1,8 @@
 # Databricks notebook source
-"""One notebook job: Excel -> Bronze -> Silver -> Gold managed Delta tables.
+"""Job em um notebook: Excel -> tabelas Delta gerenciadas Bronze, Silver e Gold.
 
-Run only after the old pipeline-owned objects have been migrated. This module
-does not run as Lakeflow source code and has no network or API calls.
+Execute somente após migrar os objetos controlados pelas pipelines antigas.
+Este módulo não é executado como código-fonte do Lakeflow nem faz chamadas de rede ou API.
 """
 
 import re
@@ -35,7 +35,7 @@ def _targets() -> list[str]:
 
 
 def _unsafe_existing_targets(names: list[str]) -> list[str]:
-    """Only resume automatically over ordinary managed Delta tables."""
+    """Retoma automaticamente apenas sobre tabelas Delta gerenciadas comuns."""
     unsafe = []
     for name in names:
         kind = spark.catalog.getTable(name).tableType.upper()
@@ -50,9 +50,9 @@ def _unsafe_existing_targets(names: list[str]) -> list[str]:
 
 def _write_table(name: str, frame, *, supplier_filter: bool = False) -> None:
     if supplier_filter:
-        # The only SQL here is table DDL. All KPI calculations remain PySpark.
-        # Applying the filter in CREATE makes publication atomic and keeps the
-        # supplier policy on later replacements.
+        # O único SQL aqui cria a tabela; os cálculos dos indicadores usam PySpark.
+        # Aplicar o filtro na criação torna a publicação atômica e mantém a
+        # política de acesso do fornecedor nas substituições seguintes.
         temporary = f"_solaria_{name.rsplit('.', 1)[-1]}"
         frame.createOrReplaceTempView(temporary)
         try:
@@ -72,12 +72,17 @@ def _write_table(name: str, frame, *, supplier_filter: bool = False) -> None:
 
 
 def run() -> None:
+    # Lendo e validando os parâmetros da execução.
     set_catalog(_catalog_parameter())
     source_mode = _parameter("source_mode", "manual").lower()
     if source_mode != "manual":
         raise ValueError("Only source_mode=manual is implemented; automatic CoreDB ingestion is not configured")
 
     source_paths = {
+
+
+
+
         "fornecedores": _parameter("fornecedores_path", f"/Volumes/{catalog()}/{BRONZE}/manual_ingestion/fornecedores.xlsx"),
         "admins": _parameter("admins_path", f"/Volumes/{catalog()}/{BRONZE}/manual_ingestion/admins.xlsx"),
     }
@@ -85,9 +90,11 @@ def run() -> None:
     if not all(source_paths.values()):
         raise ValueError("Both workbook paths are required")
 
+    # Criando os schemas de destino quando necessário.
     for schema in (SILVER, GOLD):
         spark.sql(f"CREATE SCHEMA IF NOT EXISTS {catalog()}.{schema}")
 
+    # Verificando se os objetos existentes podem ser substituídos.
     targets = _targets()
     existing = [name for name in targets if spark.catalog.tableExists(name)]
     if existing and not allow_replace:
@@ -99,6 +106,7 @@ def run() -> None:
                 f"this protection. Objects: {unsafe}"
             )
 
+    # Lendo as planilhas e gravando as tabelas Bronze.
     for workbook, sheets in SHEETS.items():
         for sheet, required in sheets.items():
             _write_table(
@@ -106,11 +114,12 @@ def run() -> None:
                 read_bronze(workbook, sheet, required, source_paths[workbook]),
             )
 
-    # Validate every Bronze source before publishing any Silver table.
+    # Validando todas as fontes Bronze antes de gravar as tabelas Silver.
     silver_frames = [(name, silver_frame(name)) for name in (*SPECS, "technicians")]
     for name, frame in silver_frames:
         _write_table(table(SILVER, name), frame)
 
+    # Calculando e gravando os indicadores Gold.
     for name, build in GOLD_BUILDERS.items():
         _write_table(
             table(GOLD, name),
