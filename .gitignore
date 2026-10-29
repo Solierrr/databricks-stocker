@@ -66,4 +66,5 @@ Desktop.ini
 # Linux
 .directory
 
-local-output
+# Resultados locais dos KPIs
+/local-output/

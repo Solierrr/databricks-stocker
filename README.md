@@ -53,3 +53,7 @@ As tabelas de fornecedor usam row filter; provisione `security/supplier_access.s
 ## Outras etapas futuras
 
 A exportação usa `exports/trigger_gold_sync.py` para chamar a API após o notebook de transformação. O job, o modo de execução serverless, as permissões e os segredos ainda precisam ser provisionados no Databricks; nenhum serviço foi acionado nesta alteração.
+
+## Execução local dos KPIs
+
+Use `python -B run_local.py` ou abra `rodar_local.bat` no Windows para executar Bronze → Silver → Gold com os Excel locais e gerar `local-output/gold_kpis.json`. Consulte a [preparação e os limites da execução local](docs/execucao-local.md).
