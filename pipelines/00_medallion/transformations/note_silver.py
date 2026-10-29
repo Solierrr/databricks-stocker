@@ -1,4 +1,6 @@
-"""Silver DataFrame builders migrated from archived SQL transformations."""
+"""Criação dos DataFrames Silver migrados das transformações SQL arquivadas."""
+
+from functools import reduce
 
 from pyspark.sql import functions as F
 from databricks.sdk.runtime import spark
@@ -6,8 +8,8 @@ from databricks.sdk.runtime import spark
 from note_catalog import BRONZE, table
 
 
-# Excel exports store these measures and flags as text. Keep identifiers as
-# strings, but publish typed Silver columns before Gold performs arithmetic.
+# As exportações do Excel armazenam medidas e sinalizadores como texto.
+# Mantemos os IDs como texto e definimos os tipos antes dos cálculos na Gold.
 NUMERIC_TYPES = {
     "quantity": "bigint",
     "availability": "bigint",
@@ -37,11 +39,34 @@ TIMESTAMP_COLUMNS = {
 }
 
 
+# Regras confirmadas no schema versionado. Estoque e disponibilidade aceitam zero.
+REQUIRED_MEASURES = {
+    "offer": ("availability",),
+    "inventory": ("quantity",),
+    "proposal_item": ("quantity",),
+    "proposal_unit": ("quantity",),
+}
+NONNEGATIVE_MEASURES = {"offer": ("availability",), "inventory": ("quantity",)}
+POSITIVE_MEASURES = {"proposal_item": ("quantity",), "proposal_unit": ("quantity",)}
+STATUS_VALUES = {
+    "company_status": ("UNDER_ANALYSIS", "APPROVED", "REJECTED"),
+    "supplier_status": ("ACTIVE", "SUSPENDED", "DEACTIVATED"),
+    "model_status": ("APPROVED", "REJECTED", "UNDER_ANALYSIS"),
+    "proposal_status": ("AWAITING_SUPPLIER", "AWAITING_REQUESTER", "ACCEPTED", "REJECTED", "CANCELED"),
+    "project_status": ("OPEN", "IN_PROGRESS", "COMPLETED", "CANCELED"),
+    "service_status": ("OPEN", "IN_PROGRESS", "COMPLETED", "CANCELED"),
+    "subscription_status": ("PAID", "IN_DEBT", "SUSPENDED"),
+    "charge_status": ("PENDING", "PAID", "CANCELED", "REFUNDED"),
+}
+
+
+# Removendo espaços e convertendo textos vazios em nulos.
 def _text(source: str):
     identifier = ".".join(f"`{part}`" for part in source.split("."))
     return F.nullif(F.trim(F.col(identifier).cast("string")), F.lit(""))
 
 
+# Convertendo números, datas e booleanos e padronizando textos.
 def _value(source: str, output: str, rule: str = "raw"):
     value = _text(source)
     identifier = ".".join(f"`{part}`" for part in source.split("."))
@@ -66,10 +91,36 @@ def _value(source: str, output: str, rule: str = "raw"):
     return value
 
 
+# Identificando perda de casas decimais na conversão.
+def _loses_decimal_digits(source: str, scale: int):
+    """Detecta dígitos não nulos descartados, mesmo além da precisão decimal(38, 10).
+
+    O Excel pode fornecer células de texto, decimais ou ponto flutuante. Comparar
+    duas conversões não detecta frações pequenas quando ambas arredondam para zero.
+    Os dígitos originais são analisados, inclusive em notação científica.
+    """
+    identifier = ".".join(f"`{part}`" for part in source.split("."))
+    clean = f"nullif(trim(cast({identifier} as string)), '')"
+    mantissa_digits = (
+        f"regexp_replace(regexp_replace({clean}, '[eE].*$', ''), '[^0-9]', '')"
+    )
+    integer_length = f"length(regexp_extract({clean}, '^[+-]?([0-9]*)', 1))"
+    exponent = (
+        f"greatest(-1000, least(1000, coalesce(try_cast(nullif(regexp_extract({clean}, "
+        "'[eE]([+-]?[0-9]+)$', 1), '') as int), 0)))"
+    )
+    first_discarded = f"greatest({integer_length} + {exponent} + {scale} + 1, 1)"
+    return F.expr(
+        f"substring({mantissa_digits}, {first_discarded}, "
+        f"length({mantissa_digits})) rlike '[1-9]'"
+    )
+
+
 def _column(source: str, output: str, rule: str = "raw"):
     return _value(source, output, rule).alias(output)
 
 
+# Definindo as fontes e colunas de cada tabela Silver.
 SPECS = {
     "companies": ("company", [("id", "company_id", "raw"), ("type", "company_type", "upper"), ("status", "company_status", "upper"), ("trade_name", "trade_name", "clean"), ("corporate_name", "corporate_name", "clean"), ("slug", "slug", "clean")]),
     "suppliers": ("supplier", [("id", "supplier_id", "raw"), ("company_id", "company_id", "raw"), ("status", "supplier_status", "upper"), ("business_type", "business_type", "clean")]),
@@ -97,46 +148,83 @@ SPECS = {
 }
 
 
-def _validate_source(frame, name: str, columns) -> None:
-    """Reject missing fields, malformed values and duplicate or empty row IDs."""
+def _validate_source(frame, name: str, columns):
+    """Retira registros inválidos da Silver e informa as quantidades na execução."""
+    # Verificando as colunas necessárias na Bronze.
     missing = sorted({source for source, _, _ in columns} - set(frame.columns))
     if missing:
         raise ValueError(f"Bronze {name}: missing Silver columns {missing}")
 
+    # Validando IDs vazios e valores preenchidos que não podem ser convertidos.
     checks = {"id": _text("id").isNull()}
     for source, output, rule in columns:
         if output in NUMERIC_TYPES or output in BOOLEAN_COLUMNS or output in DATE_COLUMNS | TIMESTAMP_COLUMNS:
             converted = _value(source, output, rule)
             invalid = converted.isNull()
             if output in NUMERIC_TYPES:
+                kind = NUMERIC_TYPES[output]
+                scale = 0 if kind == "bigint" else int(kind.split(",")[1][:-1])
+                invalid = invalid | _loses_decimal_digits(source, scale)
+            elif output in DATE_COLUMNS:
+                # O Spark aceita timestamp como DATE e descarta o horário sem avisar.
                 identifier = ".".join(f"`{part}`" for part in source.split("."))
-                parsed = F.expr(
-                    f"try_cast(nullif(trim(cast({identifier} as string)), '') as decimal(38,10))"
+                clean = f"nullif(trim(cast({identifier} as string)), '')"
+                timestamp = F.expr(f"try_cast({clean} as timestamp)")
+                invalid = invalid | timestamp.isNull() | (
+                    timestamp != converted.cast("timestamp")
                 )
-                invalid = invalid | (parsed.isNotNull() &
-                                     (parsed != converted.cast("decimal(38,10)")))
             checks[output] = _text(source).isNotNull() & invalid
+        if output in STATUS_VALUES:
+            status = F.upper(_text(source))
+            checks[output] = status.isNotNull() & ~status.isin(*STATUS_VALUES[output])
+        if output in NONNEGATIVE_MEASURES.get(name, ()):
+            checks[output] = checks[output] | (_value(source, output, rule) < 0)
+        if output in POSITIVE_MEASURES.get(name, ()):
+            checks[output] = checks[output] | (_value(source, output, rule) <= 0)
 
+    # Campos obrigatórios vazios também tornam o registro inválido.
+    for field in REQUIRED_MEASURES.get(name, ()):
+        checks[f"{field}_required"] = _text(field).isNull()
+
+    # O aceite e a conclusão de um serviço não podem anteceder sua criação.
+    # Quando há aceite, a conclusão também não pode acontecer antes dele.
+    if name == "technical_service":
+        created = _value("created_at", "created_at")
+        accepted = _value("accepted_at", "accepted_at")
+        ended = _value("ends_at", "ends_at")
+        checks["accepted_at_before_created_at"] = accepted < created
+        checks["ends_at_before_created_at"] = ended < created
+        checks["ends_at_before_accepted_at"] = ended < accepted
+
+    # Informando quantos registros falharam em cada regra.
     counts = frame.agg(*(
         F.sum(F.when(condition, F.lit(1)).otherwise(F.lit(0))).alias(field)
         for field, condition in checks.items()
     )).first().asDict()
     invalid = {field: count for field, count in counts.items() if count}
     if invalid:
-        raise ValueError(f"Bronze {name}: invalid Silver values (field: row count): {invalid}")
+        print(f"Bronze {name}: registros retirados da Silver por regra: {invalid}")
 
-    duplicate = (frame.groupBy(_text("id").alias("row_id"))
-                 .count().where(F.col("count") > 1).limit(1).collect())
-    if duplicate:
-        raise ValueError(f"Bronze {name}: duplicate id {duplicate[0]['row_id']!r}")
+    # Retirando todas as linhas com ID duplicado, sem escolher uma versão ao acaso.
+    duplicates = (frame.groupBy(_text("id").alias("_duplicate_id"))
+                  .count().where(F.col("_duplicate_id").isNotNull() & (F.col("count") > 1))
+                  .select("_duplicate_id"))
+    duplicate_rows = frame.join(duplicates, _text("id") == F.col("_duplicate_id"), "left_semi").count()
+    if duplicate_rows:
+        print(f"Bronze {name}: {duplicate_rows} linhas retiradas da Silver por ID duplicado")
+    invalid_row = reduce(lambda left, right: left | F.coalesce(right, F.lit(False)),
+                         checks.values(), F.lit(False))
+    clean = frame.filter(~invalid_row)
+    return clean.join(duplicates, _text("id") == F.col("_duplicate_id"), "left_anti")
 
 
+# Relacionando técnicos às pessoas após validar as fontes.
 def technicians():
-    tech = spark.read.table(table(BRONZE, "technician")).alias("t")
-    people = spark.read.table(table(BRONZE, "person")).alias("p")
-    _validate_source(tech, "technician", [("id", "technician_id", "raw"), ("person_id", "person_id", "raw"), ("slug", "technician_slug", "clean")])
-    _validate_source(people, "person", [("id", "person_id", "raw"), ("user_id", "user_id", "raw")])
-    return tech.join(people, F.col("t.person_id") == F.col("p.id"), "left").select(
+    tech = spark.read.table(table(BRONZE, "technician"))
+    people = spark.read.table(table(BRONZE, "person"))
+    tech = _validate_source(tech, "technician", [("id", "technician_id", "raw"), ("person_id", "person_id", "raw"), ("slug", "technician_slug", "clean")]).alias("t")
+    people = _validate_source(people, "person", [("id", "person_id", "raw"), ("user_id", "user_id", "raw")]).alias("p")
+    return tech.join(people, _text("t.person_id") == _text("p.id"), "left").select(
         _column("t.id", "technician_id"),
         _column("t.person_id", "person_id"),
         _column("p.user_id", "user_id"),
@@ -144,12 +232,13 @@ def technicians():
     )
 
 
+# Validando a fonte e aplicando o mapeamento da tabela Silver.
 def silver_frame(name: str):
     if name == "technicians":
         return technicians()
     source, columns = SPECS[name]
     frame = spark.read.table(table(BRONZE, source))
-    _validate_source(frame, source, columns)
+    frame = _validate_source(frame, source, columns)
     return frame.select(
         *(_column(*column) for column in columns)
     )
