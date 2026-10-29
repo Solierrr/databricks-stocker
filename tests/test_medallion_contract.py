@@ -79,21 +79,25 @@ class SilverContractTest(unittest.TestCase):
             self.validate(frame, "offer", [("id", "offer_id", "raw"), ("unit_price", "unit_price", "raw")])
         frame.agg.assert_not_called()
 
-    def test_invalid_numeric_value_is_reported(self):
+    def test_invalid_numeric_value_is_reported_and_filtered(self):
         frame = Mock(columns=["id", "unit_price"])
         frame.agg.return_value.first.return_value.asDict.return_value = {"id": 0, "unit_price": 2}
-        with self.assertRaisesRegex(ValueError, "Bronze offer: invalid Silver values .*'unit_price': 2"):
-            self.validate(frame, "offer", [("id", "offer_id", "raw"), ("unit_price", "unit_price", "raw")])
-        frame.groupBy.assert_not_called()
+        frame.join.return_value.count.return_value = 0
+        with patch("builtins.print") as output:
+            result = self.validate(frame, "offer", [("id", "offer_id", "raw"), ("unit_price", "unit_price", "raw")])
+        output.assert_called_once()
+        self.assertIn("'unit_price': 2", output.call_args.args[0])
+        frame.filter.assert_called_once()
+        self.assertIs(result, frame.filter.return_value.join.return_value)
 
-    def test_duplicate_id_is_reported(self):
+    def test_duplicate_ids_are_reported_and_filtered(self):
         frame = Mock(columns=["id"])
         frame.agg.return_value.first.return_value.asDict.return_value = {"id": 0}
-        frame.groupBy.return_value.count.return_value.where.return_value.limit.return_value.collect.return_value = [
-            {"row_id": "duplicate"}
-        ]
-        with self.assertRaisesRegex(ValueError, "Bronze offer: duplicate id 'duplicate'"):
+        frame.join.return_value.count.return_value = 2
+        with patch("builtins.print") as output:
             self.validate(frame, "offer", [("id", "offer_id", "raw")])
+        self.assertIn("2 linhas", output.call_args.args[0])
+        self.assertEqual(frame.filter.return_value.join.call_args.args[-1], "left_anti")
 
 
 class NotebookContractTest(unittest.TestCase):
