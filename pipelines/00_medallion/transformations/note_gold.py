@@ -1,4 +1,4 @@
-"""The 19 Gold DataFrame builders migrated from archived SQL transformations."""
+"""Criação dos 19 DataFrames Gold migrados das transformações SQL arquivadas."""
 
 from pyspark.sql import functions as F
 from databricks.sdk.runtime import spark
@@ -6,14 +6,17 @@ from databricks.sdk.runtime import spark
 from note_catalog import SECURITY, SILVER, table
 
 
+# Identificando o filtro de acesso às tabelas de fornecedores.
 def supplier_filter_name() -> str:
     return table(SECURITY, "can_read_supplier")
 
 
+# Lendo as tabelas Silver usadas nos indicadores.
 def silver(name: str):
     return spark.read.table(table(SILVER, name))
 
 
+# Indicadores administrativos de cadastros, modelos e propostas.
 def kpi_admin_registrations():
     suppliers = silver("suppliers").where(F.col("supplier_status") == "ACTIVE").agg(
         F.countDistinct("supplier_id").alias("active_suppliers")
@@ -36,6 +39,7 @@ def kpi_admin_proposals_by_status():
     )
 
 
+# Indicadores de ofertas e estoque por fornecedor.
 def kpi_supplier_offers_by_status():
     return silver("offers").groupBy("supplier_id", "commercial_status").agg(
         F.countDistinct("offer_id").alias("offer_count")
@@ -57,6 +61,7 @@ def kpi_supplier_stock_by_model():
         ))
 
 
+# Indicadores de unidades, propostas e projetos dos solicitantes.
 def kpi_requester_summary():
     units = silver("local_units").groupBy("requester_id").agg(
         F.countDistinct("local_unit_id").alias("registered_local_units")
@@ -94,6 +99,7 @@ def kpi_requester_projects_by_status():
         .agg(F.countDistinct("project_id").alias("project_count")))
 
 
+# Indicadores de vínculos, serviços e avaliações dos profissionais.
 def kpi_professional_summary():
     affiliations = silver("technician_affiliations").alias("a")
     technicians = silver("technicians").alias("t")
@@ -138,6 +144,7 @@ def kpi_professional_reviews():
         ))
 
 
+# Resumos de ofertas, preços, vencimentos e estoque dos fornecedores.
 def kpi_supplier_offers_summary():
     suppliers = silver("suppliers").alias("s")
     offers = silver("offers").alias("o")
@@ -189,6 +196,7 @@ def kpi_supplier_stock_summary():
         ))
 
 
+# Relacionando itens, ofertas e propostas dos fornecedores.
 def _supplier_proposal_items():
     items = silver("proposal_items").alias("i")
     offers = silver("offers").alias("o")
@@ -204,6 +212,7 @@ def kpi_supplier_proposals_by_status():
         .agg(F.countDistinct("p.proposal_id").alias("received_proposals")))
 
 
+# Calculando quantidades, valores negociados e taxas das propostas.
 def kpi_supplier_proposals_summary():
     source = _supplier_proposal_items()
     supplier_proposals = source.select(
@@ -249,6 +258,7 @@ def kpi_supplier_proposals_summary():
         ))
 
 
+# Detalhando propostas aceitas por modelo e data de criação.
 def kpi_supplier_accepted_value_by_model():
     source = _supplier_proposal_items().where(F.col("p.proposal_status") == "ACCEPTED")
     models = silver("product_models").alias("m")
@@ -279,6 +289,7 @@ def kpi_supplier_accepted_offers_by_date():
         .agg(F.countDistinct("p.proposal_id").alias("accepted_proposals")))
 
 
+# Registrando os indicadores e identificando os que exigem filtro de fornecedor.
 GOLD_BUILDERS = {
     name: builder for name, builder in globals().items()
     if name.startswith("kpi_") and callable(builder)
