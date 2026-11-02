@@ -15,13 +15,13 @@ python -m pip install -r requirements-local.txt
 python -B run_local.py
 ```
 
-O padrão lê `recovery/fornecedores.xlsx` e `recovery/admins.xlsx` e grava `local-output/gold_kpis.json`. As planilhas não foram abertas nem copiadas para esta documentação, e os exemplos devem ser validados com cópias sintéticas autorizadas.
+O padrão lê `inputs/fornecedores.xlsx` e `inputs/admins.xlsx` e grava `local-output/gold_kpis.json`. As planilhas não foram abertas nem copiadas para esta documentação, e os exemplos devem ser validados com cópias sintéticas autorizadas.
 
 ```bash
 python -B run_local.py --fornecedores fornecedores.xlsx --admins admins.xlsx --output local-output/gold_kpis.json
 ```
 
-No Windows, `rodar_local.bat` mantém a janela aberta para mostrar o resultado. Se houver problema de loopback Java, `--temp-dir` aceita uma pasta curta e gravável própria para a execução.
+No Windows, `run_local.bat` mantém a janela aberta para mostrar o resultado. Se houver problema de loopback Java, `--temp-dir` aceita uma pasta curta e gravável própria para a execução.
 
 ## Saída
 

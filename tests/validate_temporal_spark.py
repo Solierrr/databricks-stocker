@@ -18,11 +18,11 @@ class TemporalValidationTest(unittest.TestCase):
         cls.spark = SparkSession.builder.master("local[1]").config("spark.ui.enabled", "false").appName("temporal-validation").getOrCreate()
         runtime = types.ModuleType("databricks.sdk.runtime")
         runtime.spark = cls.spark
-        catalog = types.ModuleType("note_catalog")
+        catalog = types.ModuleType("catalog")
         catalog.BRONZE = "bronze_core"
         catalog.table = lambda schema, name: f"workspace.{schema}.{name}"
-        path = Path(__file__).resolve().parents[1] / "pipelines/00_medallion/transformations/note_silver.py"
-        with patch.dict(sys.modules, {"databricks.sdk.runtime": runtime, "note_catalog": catalog}):
+        path = Path(__file__).resolve().parents[1] / "pipelines/medallion/transformations/silver.py"
+        with patch.dict(sys.modules, {"databricks.sdk.runtime": runtime, "catalog": catalog}):
             cls.validate = staticmethod(runpy.run_path(str(path))["_validate_source"])
         cls.columns = [("id", "service_id", "raw"), ("created_at", "created_at", "raw"),
                        ("accepted_at", "accepted_at", "raw"), ("ends_at", "ends_at", "raw")]

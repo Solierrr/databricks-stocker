@@ -9,10 +9,10 @@ import re
 
 from databricks.sdk.runtime import dbutils, spark
 
-from note_bronze import SHEETS, read_bronze
-from note_catalog import BRONZE, DEFAULT_CATALOG, GOLD, SILVER, catalog, set_catalog, table
-from note_gold import GOLD_BUILDERS, SUPPLIER_TABLES, supplier_filter_name
-from note_silver import SPECS, silver_frame
+from bronze import SHEETS, read_bronze
+from catalog import BRONZE, DEFAULT_CATALOG, GOLD, SILVER, catalog, set_catalog, table
+from gold import GOLD_BUILDERS, SUPPLIER_TABLES, supplier_filter_name
+from silver import SPECS, silver_frame
 
 
 def _parameter(name: str, default: str) -> str:
@@ -53,7 +53,7 @@ def _write_table(name: str, frame, *, supplier_filter: bool = False) -> None:
         # O único SQL aqui cria a tabela; os cálculos dos indicadores usam PySpark.
         # Aplicar o filtro na criação torna a publicação atômica e mantém a
         # política de acesso do fornecedor nas substituições seguintes.
-        temporary = f"_solaria_{name.rsplit('.', 1)[-1]}"
+        temporary = f"_tmp_{name.rsplit('.', 1)[-1]}"
         frame.createOrReplaceTempView(temporary)
         try:
             spark.sql(

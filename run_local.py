@@ -16,7 +16,7 @@ import types
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parent
-TRANSFORMATIONS = ROOT / "pipelines/00_medallion/transformations"
+TRANSFORMATIONS = ROOT / "pipelines/medallion/transformations"
 
 
 def json_value(value):
@@ -145,7 +145,7 @@ def run(args):
     from pyspark.sql import SparkSession
 
     os.environ.setdefault("PYSPARK_PYTHON", sys.executable)
-    session = (SparkSession.builder.master("local[2]").appName("solaria-local")
+    session = (SparkSession.builder.master("local[2]").appName("local-medallion")
                .config("spark.ui.enabled", "false")
                .config("spark.sql.shuffle.partitions", "2")
                .config("spark.sql.session.timeZone", "America/Sao_Paulo")
@@ -170,9 +170,9 @@ def run(args):
         with ExitStack() as stack:
             stack.enter_context(patch.dict(sys.modules, {"databricks.sdk.runtime": runtime}))
             stack.enter_context(patch.object(sys, "path", [str(TRANSFORMATIONS), *sys.path]))
-            catalog = importlib.import_module("note_catalog")
+            catalog = importlib.import_module("catalog")
             stack.enter_context(patch.object(catalog, "table", lambda schema, name: f"local_{schema}_{name}"))
-            main = importlib.import_module("my_transformation")
+            main = importlib.import_module("medallion")
 
             def write_local(name, frame, *, supplier_filter=False):
                 if name.startswith("local_gold_"):
@@ -213,8 +213,8 @@ def run(args):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--fornecedores", type=Path, default=ROOT / "recovery/fornecedores.xlsx")
-    parser.add_argument("--admins", type=Path, default=ROOT / "recovery/admins.xlsx")
+    parser.add_argument("--fornecedores", type=Path, default=ROOT / "inputs/fornecedores.xlsx")
+    parser.add_argument("--admins", type=Path, default=ROOT / "inputs/admins.xlsx")
     parser.add_argument("--output", type=Path, default=ROOT / "local-output/gold_kpis.json")
     parser.add_argument("--temp-dir", help="Pasta temporária curta para Java no Windows, se necessário")
     args = parser.parse_args()

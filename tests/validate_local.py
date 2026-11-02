@@ -1,6 +1,6 @@
 """Offline medallion check. Run: python tests/validate_local.py
 
-Checks repository tests and the recovery Excel files. It does not access
+Checks repository tests and the input Excel files. It does not access
 Databricks, Unity Catalog, volumes, or consume Databricks credits.
 """
 
@@ -18,7 +18,7 @@ except ImportError:
 
 
 ROOT = Path(__file__).resolve().parents[1]
-TRANSFORMATIONS = ROOT / "pipelines/00_medallion/transformations"
+TRANSFORMATIONS = ROOT / "pipelines/medallion/transformations"
 
 
 def constant(module: str, name: str):
@@ -67,14 +67,14 @@ def validate_value(value, output, numeric_types, boolean_columns, date_columns, 
 
 
 def validate_workbooks():
-    sheets = constant("note_bronze.py", "SHEETS")
-    source_sheets = constant("note_bronze.py", "SOURCE_SHEETS")
-    aliases = constant("note_bronze.py", "COLUMN_ALIASES")
-    specs = constant("note_silver.py", "SPECS")
-    numeric_types = constant("note_silver.py", "NUMERIC_TYPES")
-    boolean_columns = constant("note_silver.py", "BOOLEAN_COLUMNS")
-    date_columns = constant("note_silver.py", "DATE_COLUMNS")
-    timestamp_columns = constant("note_silver.py", "TIMESTAMP_COLUMNS")
+    sheets = constant("bronze.py", "SHEETS")
+    source_sheets = constant("bronze.py", "SOURCE_SHEETS")
+    aliases = constant("bronze.py", "COLUMN_ALIASES")
+    specs = constant("silver.py", "SPECS")
+    numeric_types = constant("silver.py", "NUMERIC_TYPES")
+    boolean_columns = constant("silver.py", "BOOLEAN_COLUMNS")
+    date_columns = constant("silver.py", "DATE_COLUMNS")
+    timestamp_columns = constant("silver.py", "TIMESTAMP_COLUMNS")
     by_source = {source: columns for source, columns in specs.values()}
     by_source.update({
         "technician": [("id", "technician_id", "raw"), ("person_id", "person_id", "raw"), ("slug", "technician_slug", "clean")],
@@ -83,7 +83,7 @@ def validate_workbooks():
     problems = []
     rows_checked = 0
     for workbook_name, definitions in sheets.items():
-        path = ROOT / "recovery" / f"{workbook_name}.xlsx"
+        path = ROOT / "inputs" / f"{workbook_name}.xlsx"
         if not path.is_file():
             problems.append(f"Arquivo ausente: {path}")
             continue
@@ -137,7 +137,7 @@ def main():
     print("Executando testes do projeto...", flush=True)
     suite = unittest.defaultTestLoader.discover(str(ROOT / "tests"), pattern="test_*.py")
     result = unittest.TextTestRunner(verbosity=1).run(suite)
-    print("Conferindo recovery/admins.xlsx e recovery/fornecedores.xlsx...", flush=True)
+    print("Conferindo inputs/admins.xlsx e inputs/fornecedores.xlsx...", flush=True)
     rows, problems = validate_workbooks()
     print(f"Linhas conferidas: {rows}; problemas encontrados: {len(problems)}")
     for problem in problems[:30]:

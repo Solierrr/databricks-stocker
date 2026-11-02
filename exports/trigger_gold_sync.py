@@ -7,7 +7,8 @@ from urllib.request import Request, urlopen
 from databricks.sdk.runtime import dbutils
 
 
-scope = "solaria-sync"
+dbutils.widgets.text("secret_scope", "sync")
+scope = dbutils.widgets.get("secret_scope")
 endpoint = dbutils.secrets.get(scope=scope, key="endpoint-url").rstrip("/")
 token = dbutils.secrets.get(scope=scope, key="api-token")
 

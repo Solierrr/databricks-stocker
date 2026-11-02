@@ -135,7 +135,7 @@ erDiagram
 
 ## Gold
 
-As 19 tabelas guardam os resultados atuais e são substituídas a cada atualização, com os nomes definidos pelos construtores em `note_gold.py`, e as dez que têm o prefixo `kpi_supplier_` recebem o filtro por fornecedor.
+As 19 tabelas guardam os resultados atuais e são substituídas a cada atualização, com os nomes definidos pelos construtores em `gold.py`, e as dez que têm o prefixo `kpi_supplier_` recebem o filtro por fornecedor.
 
 | Tabela | Grão | Conteúdo |
 |---|---|---|
@@ -175,4 +175,4 @@ O notebook escreve as três camadas, com a Silver lendo a Bronze e a Gold lendo 
 
 As substituições são feitas tabela a tabela, e uma interrupção pode deixar as camadas com atualizações diferentes, por isso a virada evita disputa com as pipelines antigas e com a carga Bronze automática.
 
-Fontes em [Bronze](https://github.com/Solierrr/databricks-stocker/blob/main/pipelines/00_medallion/transformations/note_bronze.py), [Silver](https://github.com/Solierrr/databricks-stocker/blob/main/pipelines/00_medallion/transformations/note_silver.py), [Gold](https://github.com/Solierrr/databricks-stocker/blob/main/pipelines/00_medallion/transformations/note_gold.py), [catálogo](https://github.com/Solierrr/databricks-stocker/blob/main/pipelines/00_medallion/transformations/note_catalog.py) e [segurança](https://github.com/Solierrr/databricks-stocker/blob/main/security/supplier_access.sql).
+Fontes em [Bronze](https://github.com/Solierrr/databricks-stocker/blob/main/pipelines/medallion/transformations/bronze.py), [Silver](https://github.com/Solierrr/databricks-stocker/blob/main/pipelines/medallion/transformations/silver.py), [Gold](https://github.com/Solierrr/databricks-stocker/blob/main/pipelines/medallion/transformations/gold.py), [catálogo](https://github.com/Solierrr/databricks-stocker/blob/main/pipelines/medallion/transformations/catalog.py) e [segurança](https://github.com/Solierrr/databricks-stocker/blob/main/security/supplier_access.sql).

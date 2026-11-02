@@ -24,11 +24,11 @@ flowchart LR
 
 | Caminho | Responsabilidade |
 |---|---|
-| `pipelines/00_medallion/transformations/my_transformation.py` | Parâmetros, proteção de substituição e ordem das escritas |
-| `note_bronze.py` na mesma pasta | Abas, aliases e colunas obrigatórias |
-| `note_silver.py` na mesma pasta | Projeções, tipos e validação de qualidade |
-| `note_gold.py` na mesma pasta | Construtores dos 19 indicadores |
-| `note_catalog.py` na mesma pasta | Catálogo e schemas |
+| `pipelines/medallion/transformations/medallion.py` | Parâmetros, proteção de substituição e ordem das escritas |
+| `bronze.py` na mesma pasta | Abas, aliases e colunas obrigatórias |
+| `silver.py` na mesma pasta | Projeções, tipos e validação de qualidade |
+| `gold.py` na mesma pasta | Construtores dos 19 indicadores |
+| `catalog.py` na mesma pasta | Catálogo e schemas |
 | `run_local.py` | Adaptadores Excel, Spark local e saída JSON |
 | `exports/` | Job e notebook que chama a API |
 | `security/` | Tabela de principais e função de filtro |
@@ -65,4 +65,4 @@ A saída é substituída só após calcular todos os indicadores. Decimais viram
 
 O catálogo padrão do módulo é `workspace`, o job usa `analytics`, os painéis apontam para `workspace.gold` e o exportador atual ainda exige `workspace.gold_core` com outros nomes. O contrato deste repositório é a referência, e o exportador é que precisa se adaptar a ele.
 
-O processamento informa no terminal as contagens de rejeição e as linhas de cada tabela, sem rota de health nem serviço sempre ativo, e a main analisada é a `4b1ce020`, de 2026-10-31. As fontes principais são o [orquestrador](https://github.com/Solierrr/databricks-stocker/blob/main/pipelines/00_medallion/transformations/my_transformation.py), a [Silver](https://github.com/Solierrr/databricks-stocker/blob/main/pipelines/00_medallion/transformations/note_silver.py), o [executor local](https://github.com/Solierrr/databricks-stocker/blob/main/run_local.py) e o [job](https://github.com/Solierrr/databricks-stocker/blob/main/exports/medallion_export_job.json).
+O processamento informa no terminal as contagens de rejeição e as linhas de cada tabela, sem rota de health nem serviço sempre ativo, e a main analisada é a `4b1ce020`, de 2026-10-31. As fontes principais são o [orquestrador](https://github.com/Solierrr/databricks-stocker/blob/main/pipelines/medallion/transformations/medallion.py), a [Silver](https://github.com/Solierrr/databricks-stocker/blob/main/pipelines/medallion/transformations/silver.py), o [executor local](https://github.com/Solierrr/databricks-stocker/blob/main/run_local.py) e o [job](https://github.com/Solierrr/databricks-stocker/blob/main/exports/medallion_export_job.json).
