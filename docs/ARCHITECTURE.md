@@ -8,9 +8,9 @@ Um notebook orquestra módulos PySpark para ingestão manual, normalização e c
 
 ```mermaid
 flowchart LR
-  E[Duas planilhas Excel] --> B[27 tabelas Bronze]
-  B --> S[26 tabelas Silver]
-  S --> G[26 tabelas Gold]
+  E[Duas planilhas Excel] --> B[28 tabelas Bronze]
+  B --> S[27 tabelas Silver]
+  S --> G[27 tabelas Gold]
   G --> D[Definições de painéis]
   G --> X[Task de exportação]
   X -->|HTTP e Bearer de serviço| A[Serviço de sincronização]
@@ -27,7 +27,7 @@ flowchart LR
 | `pipelines/medallion/transformations/medallion.py` | Parâmetros, proteção de substituição e ordem das escritas |
 | `bronze.py` na mesma pasta | Abas, aliases e colunas obrigatórias |
 | `silver.py` na mesma pasta | Projeções, tipos e validação de qualidade |
-| `gold.py` na mesma pasta | Construtores dos 26 indicadores |
+| `gold.py` na mesma pasta | Construtores dos 27 indicadores |
 | `catalog.py` na mesma pasta | Catálogo e schemas |
 | `run_local.py` | Adaptadores Excel, Spark local e saída JSON |
 | `exports/` | Job e notebook que chama a API |
@@ -49,7 +49,7 @@ O repositório não tem API HTTP, OpenAPI nem banco de negócio próprios, e os 
 
 ## Escrita e consistência
 
-O `source_mode` aceita apenas `manual`. A Bronze lê 27 abas, adapta os cabeçalhos antigos e mantém as demais colunas, a Silver valida as fontes antes de escrever as 24 projeções e a Gold calcula 19 tabelas, com substituições tabela a tabela e sem uma transação global entre as três camadas.
+O `source_mode` aceita apenas `manual`. A Bronze lê 28 abas, adapta os cabeçalhos antigos e mantém as demais colunas, a Silver valida as fontes antes de escrever as 27 projeções e a Gold calcula 27 tabelas, com substituições tabela a tabela e sem uma transação global entre as três camadas.
 
 A proteção padrão permite substituir tabelas Delta gerenciadas existentes, mas recusa views e objetos de outro formato. `allow_replace_existing` remove explicitamente essa barreira. O parâmetro falso não significa proibir toda substituição.
 
