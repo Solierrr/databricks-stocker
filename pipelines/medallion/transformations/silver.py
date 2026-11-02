@@ -5,7 +5,7 @@ from functools import reduce
 from pyspark.sql import functions as F
 from databricks.sdk.runtime import spark
 
-from note_catalog import BRONZE, table
+from catalog import BRONZE, table
 
 
 # As exportações do Excel armazenam medidas e sinalizadores como texto.

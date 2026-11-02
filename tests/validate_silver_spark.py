@@ -14,7 +14,7 @@ from unittest.mock import patch
 from pyspark.sql import SparkSession
 
 
-TRANSFORMATIONS = Path(__file__).resolve().parents[1] / "pipelines/00_medallion/transformations"
+TRANSFORMATIONS = Path(__file__).resolve().parents[1] / "pipelines/medallion/transformations"
 
 
 class SilverSparkTest(unittest.TestCase):
@@ -28,12 +28,12 @@ class SilverSparkTest(unittest.TestCase):
         cls.spark.sparkContext.setLogLevel("ERROR")
         runtime = types.ModuleType("databricks.sdk.runtime")
         runtime.spark = cls.spark
-        catalog = types.ModuleType("note_catalog")
+        catalog = types.ModuleType("catalog")
         catalog.BRONZE = "bronze_core"
         catalog.table = lambda schema, name: f"workspace.{schema}.{name}"
         with patch.dict(sys.modules, {"databricks.sdk.runtime": runtime,
-                                      "note_catalog": catalog}):
-            module = runpy.run_path(str(TRANSFORMATIONS / "note_silver.py"))
+                                      "catalog": catalog}):
+            module = runpy.run_path(str(TRANSFORMATIONS / "silver.py"))
         cls.validate = staticmethod(module["_validate_source"])
         cls.value = staticmethod(module["_value"])
 

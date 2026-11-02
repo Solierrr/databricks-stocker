@@ -68,3 +68,10 @@ Desktop.ini
 
 # Resultados locais dos KPIs
 /local-output/
+
+# Python
+__pycache__/
+*.pyc
+
+# local runs
+local-output/

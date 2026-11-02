@@ -8,7 +8,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
 
-TRANSFORMATIONS = Path(__file__).resolve().parents[1] / "pipelines/00_medallion/transformations"
+TRANSFORMATIONS = Path(__file__).resolve().parents[1] / "pipelines/medallion/transformations"
 
 
 def runtime_modules(spark, dbutils=None):
@@ -30,7 +30,7 @@ class BronzeContractTest(unittest.TestCase):
         self.modules = patch.dict(sys.modules, runtime_modules(self.spark))
         self.modules.start()
         self.addCleanup(self.modules.stop)
-        self.read_bronze = runpy.run_path(str(TRANSFORMATIONS / "note_bronze.py"))["read_bronze"]
+        self.read_bronze = runpy.run_path(str(TRANSFORMATIONS / "bronze.py"))["read_bronze"]
 
     def test_explicit_fourth_argument_is_used(self):
         result = self.read_bronze("admins", "company", ("id",), "/Volumes/admins.xlsx")
@@ -66,12 +66,12 @@ class SilverContractTest(unittest.TestCase):
         sql = types.ModuleType("pyspark.sql")
         sql.functions = MagicMock()
         sql.functions.col.return_value.__gt__.return_value = MagicMock()
-        catalog = types.ModuleType("note_catalog")
+        catalog = types.ModuleType("catalog")
         catalog.BRONZE = "bronze_core"
         catalog.table = lambda schema, name: f"workspace.{schema}.{name}"
         with patch.dict(sys.modules, {**runtime_modules(Mock()), "pyspark": pyspark,
-                                      "pyspark.sql": sql, "note_catalog": catalog}):
-            self.validate = runpy.run_path(str(TRANSFORMATIONS / "note_silver.py"))["_validate_source"]
+                                      "pyspark.sql": sql, "catalog": catalog}):
+            self.validate = runpy.run_path(str(TRANSFORMATIONS / "silver.py"))["_validate_source"]
 
     def test_missing_source_column_is_reported(self):
         frame = Mock(columns=["id"])
@@ -108,17 +108,17 @@ class NotebookContractTest(unittest.TestCase):
         parameters = {"catalog": "analytics", "source_mode": "manual", "fornecedores_path": "/Volumes/fornecedores.xlsx",
                       "admins_path": "/Volumes/admins.xlsx", "allow_replace_existing": "false"}
         dbutils.widgets.get.side_effect = parameters.__getitem__
-        bronze = types.ModuleType("note_bronze")
+        bronze = types.ModuleType("bronze")
         bronze.SHEETS = {"fornecedores": {"offer": ("id",)}, "admins": {"company": ("id",)}}
         bronze.read_bronze = Mock(return_value=Mock())
-        silver = types.ModuleType("note_silver")
+        silver = types.ModuleType("silver")
         silver.SPECS = {"companies": None}
         silver.silver_frame = Mock(return_value=Mock())
-        gold = types.ModuleType("note_gold")
+        gold = types.ModuleType("gold")
         gold.GOLD_BUILDERS = {"kpi_admin_cadastros": Mock(return_value=Mock())}
         gold.supplier_filter_name = Mock(return_value="analytics.gold_security.can_read_supplier")
         gold.SUPPLIER_TABLES = frozenset()
-        catalog = types.ModuleType("note_catalog")
+        catalog = types.ModuleType("catalog")
         catalog.BRONZE = "bronze_core"
         catalog.SILVER = "silver"
         catalog.GOLD = "gold"
@@ -126,9 +126,9 @@ class NotebookContractTest(unittest.TestCase):
         catalog.catalog = Mock(return_value="analytics")
         catalog.set_catalog = Mock()
         catalog.table = lambda schema, name: f"analytics.{schema}.{name}"
-        with patch.dict(sys.modules, {**runtime_modules(spark, dbutils), "note_bronze": bronze,
-                                      "note_silver": silver, "note_gold": gold, "note_catalog": catalog}):
-            notebook = runpy.run_path(str(TRANSFORMATIONS / "my_transformation.py"))
+        with patch.dict(sys.modules, {**runtime_modules(spark, dbutils), "bronze": bronze,
+                                      "silver": silver, "gold": gold, "catalog": catalog}):
+            notebook = runpy.run_path(str(TRANSFORMATIONS / "medallion.py"))
             notebook["run"]()
         catalog.set_catalog.assert_called_once_with("analytics")
         spark.conf.set.assert_not_called()

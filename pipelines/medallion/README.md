@@ -1,8 +1,8 @@
-# Fluxo único em notebook: Excel → Bronze → Silver → Gold
+# Fluxo único em notebook: Excel, Bronze, Silver e Gold
 
-`transformations/my_transformation.py` é o notebook de transformação. Ele chama
-`note_bronze.py`, `note_silver.py` e `note_gold.py` na ordem e grava **tabelas
-Delta gerenciadas comuns**, com os mesmos nomes das antigas views: 25 Bronze,
+`transformations/medallion.py` é o notebook de transformação. Ele chama
+`bronze.py`, `silver.py` e `gold.py` na ordem e grava tabelas
+Delta gerenciadas comuns, com os mesmos nomes das antigas views: 25 Bronze,
 24 Silver e 19 Gold. Os KPIs continuam em PySpark; somente a criação das dez
 tabelas Gold de fornecedor usa DDL SQL para aplicar o row filter. Não há três
 pipelines, nem uma Lakeflow Declarative Pipeline ativa nesta pasta.
@@ -13,7 +13,7 @@ A exportação só começa se a transformação terminar com sucesso. O job não
 agendamento nem compute explicitamente configurado: revise o modo serverless
 disponível na conta antes de implantá-lo.
 Nada foi instalado ou executado por esta alteração.
-O parâmetro `source_mode` aceita somente `manual` nesta versão; CoreDB → Bronze
+O parâmetro `source_mode` aceita somente `manual` nesta versão; CoreDB para Bronze
 automático permanece no serviço `databricks-sync` e não é acionado por este job.
 
 ## Contrato das planilhas
@@ -21,7 +21,7 @@ automático permanece no serviço `databricks-sync` e não é acionado por este 
 Carregue dois arquivos `.xlsx` em um Unity Catalog Volume. Os caminhos no
 job são exemplos configuráveis. Cada entidade abaixo é uma aba com esse nome,
 cabeçalho na primeira linha e uma linha por registro. `SHEETS` em
-`note_bronze.py` enumera as colunas mínimas; colunas adicionais permanecem na
+`bronze.py` enumera as colunas mínimas; colunas adicionais permanecem na
 Bronze. Falta de aba ou coluna causa falha explícita.
 
 | Arquivo | Abas |
@@ -39,7 +39,7 @@ de publicar cada tabela. A leitura nativa exige Databricks Runtime 17.1 ou super
 Nomes de abas e colunas seguem o baseline renomeado do CoreDB (views do schema
 `export`): FKs como `<tabela>_id`, booleanos com `is_`/`has_`, datas com
 `_at`, `company_plan` no singular e `model_name`. A leitura Bronze também aceita
-os cabeçalhos anteriores dos arquivos em `recovery/` e a aba `company_plans`,
+os cabeçalhos anteriores dos arquivos em `inputs/` e a aba `company_plans`,
 renomeando as colunas necessárias antes de publicar as tabelas Bronze. O
 catálogo é o parâmetro `catalog` (`workspace` na execução manual sem parâmetro;
 o job versionado usa `analytics`), e os volumes dos caminhos devem pertencer
@@ -48,9 +48,9 @@ original não foram adicionados: não há essas entidades na Silver.
 
 ## Implantação e cutover
 
-Se `my_transformation` falhar com `read_bronze() takes 3 positional arguments
-but 4 were given`, atualize **os dois** arquivos
-`transformations/my_transformation.py` e `transformations/note_bronze.py` no
+Se `medallion` falhar com `read_bronze() takes 3 positional arguments
+but 4 were given`, atualize os dois arquivos
+`transformations/medallion.py` e `transformations/bronze.py` no
 workspace. A versão atual passa o caminho do Excel como quarto argumento e
 `read_bronze` exige esse argumento. Reinicie a sessão Python do notebook antes de executar de
 novo, pois módulos já importados podem permanecer em cache.
@@ -73,7 +73,7 @@ novo, pois módulos já importados podem permanecer em cache.
    bloqueadas; `allow_replace_existing=true` só deve ser usado após concluir o
    cutover e revisar os objetos que serão substituídos.
 5. Instale o job e configure os segredos da task de exportação. Cada execução
-   regrava as tabelas na ordem Bronze → Silver → Gold e então chama a API Gold.
+   regrava as tabelas na ordem Bronze para Silver para Gold e então chama a API Gold.
 
 Uma execução lê dois Excel, grava 68 tabelas e usa compute Databricks. Um job
 único não implica consumo zero da cota. Na Free Edition, o compute é

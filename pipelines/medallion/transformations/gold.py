@@ -3,7 +3,7 @@
 from pyspark.sql import functions as F
 from databricks.sdk.runtime import spark
 
-from note_catalog import SECURITY, SILVER, table
+from catalog import SECURITY, SILVER, table
 
 
 # Identificando o filtro de acesso às tabelas de fornecedores.
