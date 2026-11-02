@@ -15,6 +15,8 @@ python -m pip install -r requirements-local.txt
 python -B run_local.py
 ```
 
+Para atualizar as planilhas a partir do banco de negócio, `python export_inputs.py` lê as views do schema `export` com as variáveis `DB_POSTGRES_*` (somente leitura) e regrava `inputs/` no contrato de colunas da Bronze.
+
 O padrão lê `inputs/fornecedores.xlsx` e `inputs/admins.xlsx` e grava `local-output/gold_kpis.json`. As planilhas não foram abertas nem copiadas para esta documentação, e os exemplos devem ser validados com cópias sintéticas autorizadas.
 
 ```bash

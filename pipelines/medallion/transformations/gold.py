@@ -1,4 +1,4 @@
-"""Criação dos 19 DataFrames Gold migrados das transformações SQL arquivadas."""
+"""Criação dos DataFrames Gold migrados das transformações SQL arquivadas."""
 
 from pyspark.sql import functions as F
 from databricks.sdk.runtime import spark
@@ -287,6 +287,90 @@ def kpi_supplier_accepted_offers_by_date():
         .groupBy(F.col("o.supplier_id"), F.col("o.offer_id"), F.col("o.model_id"),
                  F.to_date(F.col("p.created_at")).alias("proposal_created_date_proxy"))
         .agg(F.countDistinct("p.proposal_id").alias("accepted_proposals")))
+
+
+# Pedidos pagos e cancelados por fornecedor, a partir dos itens de cada pedido.
+def _supplier_order_items():
+    items = silver("order_items").alias("i")
+    orders = silver("purchase_orders").alias("o")
+    return items.join(orders, F.col("o.order_id") == F.col("i.order_id"), "inner")
+
+
+def kpi_supplier_orders_summary():
+    suppliers = silver("suppliers").alias("s")
+    source = _supplier_order_items()
+    paid = F.col("o.order_status") == "PAID"
+    sales = (source.groupBy(F.col("i.supplier_id"))
+        .agg(
+            F.countDistinct(F.when(paid, F.col("o.order_id"))).alias("paid_orders"),
+            F.countDistinct(F.when(F.col("o.order_status") == "CANCELED", F.col("o.order_id"))).alias("canceled_orders"),
+            F.sum(F.when(paid, F.col("i.quantity"))).alias("units_sold"),
+            F.sum(F.when(paid, F.col("i.line_total_amount"))).alias("sales_value"),
+        ).alias("x"))
+    return (suppliers
+        .join(sales, F.col("x.supplier_id") == F.col("s.supplier_id"), "left")
+        .select(
+            F.col("s.supplier_id"),
+            F.coalesce(F.col("x.paid_orders"), F.lit(0)).alias("paid_orders"),
+            F.coalesce(F.col("x.canceled_orders"), F.lit(0)).alias("canceled_orders"),
+            F.coalesce(F.col("x.units_sold"), F.lit(0)).alias("units_sold"),
+            F.col("x.sales_value"),
+        ))
+
+
+def kpi_supplier_orders_by_status():
+    return (_supplier_order_items()
+        .groupBy(F.col("i.supplier_id"), F.col("o.order_status"))
+        .agg(F.countDistinct("o.order_id").alias("order_count")))
+
+
+def kpi_supplier_sales_by_month():
+    source = _supplier_order_items().where(F.col("o.order_status") == "PAID")
+    return (source
+        .groupBy(F.col("i.supplier_id"),
+                 F.date_trunc("MONTH", F.col("o.created_at")).alias("order_month"))
+        .agg(F.sum("i.quantity").alias("units_sold"),
+             F.sum("i.line_total_amount").alias("sales_value")))
+
+
+def kpi_supplier_sales_by_model():
+    source = _supplier_order_items().where(F.col("o.order_status") == "PAID")
+    return (source
+        .groupBy(F.col("i.supplier_id"), F.col("i.model_name"))
+        .agg(F.sum("i.quantity").alias("units_sold"),
+             F.sum("i.line_total_amount").alias("sales_value")))
+
+
+# Assinatura de cada fornecedor com o plano contratado.
+def kpi_supplier_subscription():
+    subscriptions = silver("subscriptions").alias("s")
+    plans = silver("company_plans").alias("p")
+    return (subscriptions
+        .join(plans, F.col("p.plan_id") == F.col("s.plan_id"), "left")
+        .select(
+            F.col("s.supplier_id"), F.col("s.subscription_id"),
+            F.col("p.plan_name"), F.col("p.plan_price"), F.col("p.billing_cycle"),
+            F.col("s.subscription_status"), F.col("s.has_auto_renewal"),
+            F.col("s.starts_at"), F.col("s.ends_at"),
+        ))
+
+
+# Indicadores administrativos de pedidos e assinaturas.
+def kpi_admin_orders_by_status():
+    return silver("purchase_orders").groupBy("order_status").agg(
+        F.countDistinct("order_id").alias("order_count"),
+        F.sum("total_amount").alias("total_amount"),
+        F.sum("fee_amount").alias("fee_amount"),
+    )
+
+
+def kpi_admin_subscriptions_by_plan():
+    subscriptions = silver("subscriptions").alias("s")
+    plans = silver("company_plans").alias("p")
+    return (subscriptions
+        .join(plans, F.col("p.plan_id") == F.col("s.plan_id"), "left")
+        .groupBy(F.col("p.plan_name"), F.col("p.billing_cycle"), F.col("s.subscription_status"))
+        .agg(F.countDistinct("s.subscription_id").alias("subscription_count")))
 
 
 # Registrando os indicadores e identificando os que exigem filtro de fornecedor.

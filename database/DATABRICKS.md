@@ -8,10 +8,10 @@ O notebook grava tabelas Delta gerenciadas, e o módulo define o catálogo padr�
 
 ```mermaid
 flowchart LR
-  F[Planilha de fornecedores] --> B[25 tabelas bronze_core]
+  F[Planilha de fornecedores] --> B[27 tabelas bronze_core]
   A[Planilha administrativa] --> B
-  B --> S[24 tabelas silver]
-  S --> G[19 tabelas gold]
+  B --> S[26 tabelas silver]
+  S --> G[26 tabelas gold]
   P[gold_security.supplier_access] --> R[Função can_read_supplier]
   R --> G
   G --> D[Painéis e exportação]
@@ -30,6 +30,8 @@ O leitor exige as colunas abaixo, adapta aliases de nomes antigos e preserva out
 | `inventory` | fornecedores | `id`, `supplier_id`, `model_id`, `quantity` |
 | `proposal` | fornecedores | `id`, `requester_id`, `supplier_id`, `status`, `total_amount`, `created_at`, `updated_at` |
 | `proposal_item` | fornecedores | `id`, `proposal_id`, `offer_id`, `quantity`, `negotiated_unit_price`, `discount` |
+| `purchase_order` | fornecedores | `id`, `buyer_user_id`, `status`, `subtotal_amount`, `fee_percentage`, `fee_amount`, `total_amount`, `created_at`, `canceled_at` |
+| `order_item` | fornecedores | `id`, `purchase_order_id`, `offer_id`, `supplier_id`, `offer_slug`, `model_name`, `unit_price`, `discount_percentage`, `net_unit_price`, `quantity`, `line_total_amount`, `created_at` |
 | `company` | admins | `id`, `type`, `status`, `trade_name`, `corporate_name`, `slug` |
 | `person` | admins | `id`, `user_id` |
 | `requester` | admins | `id`, `company_id`, `business_type` |
@@ -51,7 +53,7 @@ O leitor exige as colunas abaixo, adapta aliases de nomes antigos e preserva out
 
 ## Silver
 
-As 23 especificações diretas e a junção especial de técnicos com pessoas formam 24 tabelas, com os identificadores em texto, os textos vazios convertidos em null e as regras de situação escritas em maiúsculas.
+As 25 especificações diretas e a junção especial de técnicos com pessoas formam 26 tabelas, com os identificadores em texto, os textos vazios convertidos em null e as regras de situação escritas em maiúsculas.
 
 | Tabela | Origem Bronze | Colunas publicadas |
 |---|---|---|
@@ -77,6 +79,8 @@ As 23 especificações diretas e a junção especial de técnicos com pessoas fo
 | `company_plans` | `company_plan` | `plan_id`, `plan_name`, `plan_price`, `billing_cycle` |
 | `subscriptions` | `subscription` | `subscription_id`, `supplier_id`, `plan_id`, `subscription_status`, `has_auto_renewal`, `starts_at`, `ends_at` |
 | `subscription_charges` | `charge` | `charge_id`, `subscription_id`, `amount`, `payment_method`, `charge_status`, `due_date`, `paid_at` |
+| `purchase_orders` | `purchase_order` | `order_id`, `buyer_user_id`, `order_status`, `subtotal_amount`, `fee_percentage`, `fee_amount`, `total_amount`, `created_at`, `canceled_at` |
+| `order_items` | `order_item` | `order_item_id`, `order_id`, `offer_id`, `supplier_id`, `offer_slug`, `model_name`, `unit_price`, `discount_percentage`, `net_unit_price`, `quantity`, `line_total_amount`, `created_at` |
 | `energy_bills` | `energy_bill` | `energy_bill_id`, `local_unit_id`, `consumption`, `amount` |
 | `technicians` | `technician` e `person` | `technician_id`, `person_id`, `user_id`, `technician_slug` |
 
@@ -135,7 +139,7 @@ erDiagram
 
 ## Gold
 
-As 19 tabelas guardam os resultados atuais e são substituídas a cada atualização, com os nomes definidos pelos construtores em `gold.py`, e as dez que têm o prefixo `kpi_supplier_` recebem o filtro por fornecedor.
+As 26 tabelas guardam os resultados atuais e são substituídas a cada atualização, com os nomes definidos pelos construtores em `gold.py`, e as quinze que têm o prefixo `kpi_supplier_` recebem o filtro por fornecedor.
 
 | Tabela | Grão | Conteúdo |
 |---|---|---|
@@ -158,6 +162,13 @@ As 19 tabelas guardam os resultados atuais e são substituídas a cada atualiza�
 | `kpi_supplier_accepted_value_by_model` | Fornecedor e modelo | Valor negociado aceito |
 | `kpi_supplier_accepted_value_by_month` | Fornecedor e mês de criação da proposta | Valor negociado aceito, com data aproximada |
 | `kpi_supplier_accepted_offers_by_date` | Fornecedor, oferta, modelo e data de criação | Contagem de propostas aceitas, com data aproximada |
+| `kpi_supplier_orders_summary` | Fornecedor | Pedidos pagos e cancelados, unidades vendidas e valor vendido dos pedidos pagos |
+| `kpi_supplier_orders_by_status` | Fornecedor e situação do pedido | Pedidos distintos |
+| `kpi_supplier_sales_by_month` | Fornecedor e mês do pedido | Unidades e valor vendido dos pedidos pagos |
+| `kpi_supplier_sales_by_model` | Fornecedor e modelo | Unidades e valor vendido dos pedidos pagos |
+| `kpi_supplier_subscription` | Assinatura | Plano, preço, ciclo, situação, renovação automática e vigência |
+| `kpi_admin_orders_by_status` | Situação do pedido | Pedidos distintos, valor total e taxa da plataforma |
+| `kpi_admin_subscriptions_by_plan` | Plano, ciclo e situação | Assinaturas distintas |
 
 O fornecedor das propostas é derivado por item e oferta, e o valor aceito multiplica o preço negociado pela quantidade, sem reaplicar o desconto. As taxas com denominador zero ficam nulas e um preço ausente não é substituído por estimativa, enquanto as datas dos indicadores temporais são aproximações pela data de criação, já que não há histórico efetivo de aceite.
 
@@ -167,7 +178,7 @@ O fornecedor das propostas é derivado por item e oferta, e o valor aceito multi
 
 A função de filtro, que usa `session_user()`, libera a linha para um ADMIN ativo ou para um SUPPLIER ativo associado a exatamente um fornecedor, igual ao da linha. A tabela de acesso começa vazia, e as identidades do job e do exportador também precisam ter o acesso validado.
 
-O escritor aplica row filter na criação das dez tabelas de fornecedor, e as demais tabelas usam grants próprios para o consumo final, enquanto o executor local ignora esse filtro, conforme o metadado da saída.
+O escritor aplica row filter na criação das quinze tabelas de fornecedor, e as demais tabelas usam grants próprios para o consumo final, enquanto o executor local ignora esse filtro, conforme o metadado da saída.
 
 ## Escritores, leitores e ciclo
 

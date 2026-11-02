@@ -20,6 +20,11 @@ NUMERIC_TYPES = {
     "total_amount": "decimal(18,2)",
     "plan_price": "decimal(18,2)",
     "amount": "decimal(18,2)",
+    "subtotal_amount": "decimal(18,2)",
+    "fee_percentage": "decimal(18,4)",
+    "fee_amount": "decimal(18,2)",
+    "net_unit_price": "decimal(18,2)",
+    "line_total_amount": "decimal(18,2)",
     "rating": "decimal(18,2)",
     "power_wp": "decimal(18,4)",
     "efficiency": "decimal(18,4)",
@@ -35,7 +40,7 @@ BOOLEAN_COLUMNS = {
 DATE_COLUMNS = {"delivery_deadline_date", "due_date"}
 TIMESTAMP_COLUMNS = {
     "created_at", "updated_at", "expires_at", "starts_at", "ends_at",
-    "scheduled_at", "accepted_at", "paid_at",
+    "scheduled_at", "accepted_at", "paid_at", "canceled_at",
 }
 
 
@@ -45,9 +50,10 @@ REQUIRED_MEASURES = {
     "inventory": ("quantity",),
     "proposal_item": ("quantity",),
     "proposal_unit": ("quantity",),
+    "order_item": ("quantity",),
 }
 NONNEGATIVE_MEASURES = {"offer": ("availability",), "inventory": ("quantity",)}
-POSITIVE_MEASURES = {"proposal_item": ("quantity",), "proposal_unit": ("quantity",)}
+POSITIVE_MEASURES = {"proposal_item": ("quantity",), "proposal_unit": ("quantity",), "order_item": ("quantity",)}
 STATUS_VALUES = {
     "company_status": ("UNDER_ANALYSIS", "APPROVED", "REJECTED"),
     "supplier_status": ("ACTIVE", "SUSPENDED", "DEACTIVATED"),
@@ -57,6 +63,7 @@ STATUS_VALUES = {
     "service_status": ("OPEN", "IN_PROGRESS", "COMPLETED", "CANCELED"),
     "subscription_status": ("PAID", "IN_DEBT", "SUSPENDED"),
     "charge_status": ("PENDING", "PAID", "CANCELED", "REFUNDED"),
+    "order_status": ("PAID", "CANCELED"),
 }
 
 
@@ -144,6 +151,8 @@ SPECS = {
     "company_plans": ("company_plan", [("id", "plan_id", "raw"), ("name", "plan_name", "clean"), ("price", "plan_price", "raw"), ("cycle", "billing_cycle", "upper")]),
     "subscriptions": ("subscription", [("id", "subscription_id", "raw"), ("supplier_id", "supplier_id", "raw"), ("company_plan_id", "plan_id", "raw"), ("status", "subscription_status", "upper"), ("has_auto_renewal", "has_auto_renewal", "raw"), ("starts_at", "starts_at", "raw"), ("ends_at", "ends_at", "raw")]),
     "subscription_charges": ("charge", [("id", "charge_id", "raw"), ("subscription_id", "subscription_id", "raw"), ("amount", "amount", "raw"), ("payment_method", "payment_method", "upper"), ("status", "charge_status", "upper"), ("due_date", "due_date", "raw"), ("paid_at", "paid_at", "raw")]),
+    "purchase_orders": ("purchase_order", [("id", "order_id", "raw"), ("buyer_user_id", "buyer_user_id", "raw"), ("status", "order_status", "upper"), ("subtotal_amount", "subtotal_amount", "raw"), ("fee_percentage", "fee_percentage", "raw"), ("fee_amount", "fee_amount", "raw"), ("total_amount", "total_amount", "raw"), ("created_at", "created_at", "raw"), ("canceled_at", "canceled_at", "raw")]),
+    "order_items": ("order_item", [("id", "order_item_id", "raw"), ("purchase_order_id", "order_id", "raw"), ("offer_id", "offer_id", "raw"), ("supplier_id", "supplier_id", "raw"), ("offer_slug", "offer_slug", "clean"), ("model_name", "model_name", "clean"), ("unit_price", "unit_price", "raw"), ("discount_percentage", "discount_percentage", "raw"), ("net_unit_price", "net_unit_price", "raw"), ("quantity", "quantity", "raw"), ("line_total_amount", "line_total_amount", "raw"), ("created_at", "created_at", "raw")]),
     "energy_bills": ("energy_bill", [("id", "energy_bill_id", "raw"), ("local_unit_id", "local_unit_id", "raw"), ("consumption", "consumption", "raw"), ("amount", "amount", "raw")]),
 }
 
