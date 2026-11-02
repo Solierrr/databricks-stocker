@@ -30,6 +30,7 @@ SHEETS = {
         "user_company": ("id", "company_id", "user_id", "job_position_id"),
         "proposal_unit": ("id", "proposal_item_id", "local_unit_id", "quantity"),
         "local_unit": ("id", "requester_id", "address_id", "location_type"),
+        "address": ("id", "state", "city"),
         "professional_review": ("id", "technician_id", "technical_service_id", "rating", "is_active", "created_at"),
         "project_activity": ("id", "technical_project_id", "technical_service_id", "type", "status", "starts_at", "ends_at", "is_onsite"),
         "service_contract": ("id", "technical_service_id", "delivery_deadline_date", "has_insurance", "has_utility_approval"),

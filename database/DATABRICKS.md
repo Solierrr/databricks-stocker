@@ -139,13 +139,14 @@ erDiagram
 
 ## Gold
 
-As 26 tabelas guardam os resultados atuais e são substituídas a cada atualização, com os nomes definidos pelos construtores em `gold.py`, e as quinze que têm o prefixo `kpi_supplier_` recebem o filtro por fornecedor.
+As 27 tabelas guardam os resultados atuais e são substituídas a cada atualização, com os nomes definidos pelos construtores em `gold.py`, e as quinze que têm o prefixo `kpi_supplier_` recebem o filtro por fornecedor.
 
 | Tabela | Grão | Conteúdo |
 |---|---|---|
 | `kpi_admin_registrations` | Uma linha global | Fornecedores ativos e demandantes cadastrados |
 | `kpi_admin_models_by_status` | Situação do modelo | Modelos distintos |
 | `kpi_admin_proposals_by_status` | Situação da proposta | Propostas distintas |
+| `kpi_admin_demand_by_state` | Estado (UF) | Unidades cadastradas, propostas solicitadas e aceitas, unidades solicitadas e a coordenada aproximada da UF |
 | `kpi_supplier_offers_by_status` | Fornecedor e situação comercial | Ofertas distintas |
 | `kpi_supplier_stock_by_model` | Fornecedor e modelo | Marca, modelo e unidades em estoque |
 | `kpi_requester_summary` | Demandante | Empresa, unidades, propostas e projetos |
