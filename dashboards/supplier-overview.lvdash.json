@@ -1783,6 +1783,559 @@
       ],
       "pageType": "PAGE_TYPE_CANVAS",
       "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "page_supplier_distributions",
+      "displayName": "Distribuições e filtros",
+      "layout": [
+        {
+          "widget": {
+            "name": "dist_header",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<span style=\"font-size:24px;\"><b>Solaria | Distribuições e filtros</b></span><br><span style=\"font-size:13px;\">Preço e disponibilidade das suas ofertas, com filtros por situação, marca, validade e período de propostas.</span>"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "dist_filter_status",
+            "queries": [
+              {
+                "name": "dist_filter_status_q",
+                "query": {
+                  "datasetName": "71153a2e",
+                  "fields": [
+                    {
+                      "name": "commercial_status",
+                      "expression": "`commercial_status`"
+                    },
+                    {
+                      "name": "commercial_status_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "commercial_status",
+                    "displayName": "Situação comercial",
+                    "queryName": "dist_filter_status_q"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Situação comercial"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "dist_filter_brand",
+            "queries": [
+              {
+                "name": "dist_filter_brand_q",
+                "query": {
+                  "datasetName": "71153a2e",
+                  "fields": [
+                    {
+                      "name": "brand_name",
+                      "expression": "`brand_name`"
+                    },
+                    {
+                      "name": "brand_name_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "brand_name",
+                    "displayName": "Marca",
+                    "queryName": "dist_filter_brand_q"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Marca"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 2,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "dist_filter_expires",
+            "queries": [
+              {
+                "name": "dist_filter_expires_q",
+                "query": {
+                  "datasetName": "71153a2e",
+                  "fields": [
+                    {
+                      "name": "expires_at",
+                      "expression": "`expires_at`"
+                    },
+                    {
+                      "name": "expires_at_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-date-range-picker",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "expires_at",
+                    "displayName": "Validade da oferta",
+                    "queryName": "dist_filter_expires_q"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Validade da oferta"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 2,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "dist_hist_price",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "71153a2e",
+                  "fields": [
+                    {
+                      "name": "bin(unit_price, binWidth=250)",
+                      "expression": "BIN_FLOOR(`unit_price`, 250)"
+                    },
+                    {
+                      "name": "count(*)",
+                      "expression": "COUNT(`*`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "histogram",
+              "encodings": {
+                "x": {
+                  "fieldName": "bin(unit_price, binWidth=250)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Preço unitário (R$, faixas de 250)"
+                },
+                "y": {
+                  "fieldName": "count(*)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Quantidade de ofertas"
+                }
+              },
+              "frame": {
+                "title": "Distribuição do preço unitário das ofertas",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "dist_hist_availability",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "71153a2e",
+                  "fields": [
+                    {
+                      "name": "bin(availability, binWidth=200)",
+                      "expression": "BIN_FLOOR(`availability`, 200)"
+                    },
+                    {
+                      "name": "count(*)",
+                      "expression": "COUNT(`*`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "histogram",
+              "encodings": {
+                "x": {
+                  "fieldName": "bin(availability, binWidth=200)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Disponibilidade (unidades, faixas de 200)"
+                },
+                "y": {
+                  "fieldName": "count(*)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Quantidade de ofertas"
+                }
+              },
+              "frame": {
+                "title": "Distribuição da disponibilidade das ofertas",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 4,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "dist_box_price_brand",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "71153a2e",
+                  "fields": [
+                    {
+                      "name": "brand_name",
+                      "expression": "`brand_name`"
+                    },
+                    {
+                      "name": "min(unit_price)",
+                      "expression": "MIN(`unit_price`)"
+                    },
+                    {
+                      "name": "q1(unit_price)",
+                      "expression": "PERCENTILE(`unit_price`, 0.25)"
+                    },
+                    {
+                      "name": "median(unit_price)",
+                      "expression": "MEDIAN(`unit_price`)"
+                    },
+                    {
+                      "name": "q3(unit_price)",
+                      "expression": "PERCENTILE(`unit_price`, 0.75)"
+                    },
+                    {
+                      "name": "max(unit_price)",
+                      "expression": "MAX(`unit_price`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Preço unitário por marca"
+              },
+              "widgetType": "box",
+              "encodings": {
+                "x": {
+                  "fieldName": "brand_name",
+                  "axis": {
+                    "title": "Marca"
+                  },
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "whiskerStart": {
+                    "fieldName": "min(unit_price)"
+                  },
+                  "boxStart": {
+                    "fieldName": "q1(unit_price)"
+                  },
+                  "boxMid": {
+                    "fieldName": "median(unit_price)"
+                  },
+                  "boxEnd": {
+                    "fieldName": "q3(unit_price)"
+                  },
+                  "whiskerEnd": {
+                    "fieldName": "max(unit_price)"
+                  },
+                  "axis": {
+                    "title": "Preço unitário (R$)"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 10,
+            "width": 12,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "dist_filter_month",
+            "queries": [
+              {
+                "name": "dist_filter_month_q",
+                "query": {
+                  "datasetName": "fc68d122",
+                  "fields": [
+                    {
+                      "name": "proposal_created_month_proxy",
+                      "expression": "`proposal_created_month_proxy`"
+                    },
+                    {
+                      "name": "proposal_created_month_proxy_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-date-range-picker",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "proposal_created_month_proxy",
+                    "displayName": "Período da proposta",
+                    "queryName": "dist_filter_month_q"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Período da proposta"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 17,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "dist_accepted_month_chart",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fc68d122",
+                  "fields": [
+                    {
+                      "name": "monthly(proposal_created_month_proxy)",
+                      "expression": "DATE_TRUNC(\"MONTH\", `proposal_created_month_proxy`)"
+                    },
+                    {
+                      "name": "sum(accepted_negotiated_value)",
+                      "expression": "SUM(`accepted_negotiated_value`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Valor aceito por mês de criação da proposta",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "monthly(proposal_created_month_proxy)",
+                  "displayName": "Mês de criação",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(accepted_negotiated_value)",
+                  "displayName": "Valor negociado (R$)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 19,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "dist_offers_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "71153a2e",
+                  "fields": [
+                    {
+                      "name": "offer_id",
+                      "expression": "`offer_id`"
+                    },
+                    {
+                      "name": "model_name",
+                      "expression": "`model_name`"
+                    },
+                    {
+                      "name": "brand_name",
+                      "expression": "`brand_name`"
+                    },
+                    {
+                      "name": "unit_price",
+                      "expression": "`unit_price`"
+                    },
+                    {
+                      "name": "availability",
+                      "expression": "`availability`"
+                    },
+                    {
+                      "name": "expires_at",
+                      "expression": "`expires_at`"
+                    },
+                    {
+                      "name": "commercial_status",
+                      "expression": "`commercial_status`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Ofertas filtradas"
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "offer_id"
+                  },
+                  {
+                    "fieldName": "model_name"
+                  },
+                  {
+                    "fieldName": "brand_name"
+                  },
+                  {
+                    "fieldName": "unit_price"
+                  },
+                  {
+                    "fieldName": "availability"
+                  },
+                  {
+                    "fieldName": "expires_at"
+                  },
+                  {
+                    "fieldName": "commercial_status"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 25,
+            "width": 12,
+            "height": 8
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
     }
   ],
   "uiSettings": {
