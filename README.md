@@ -26,7 +26,6 @@ Python e Spark transformam as planilhas em tabelas Delta no Databricks. Uma cama
 - [STATUS.md](./docs/STATUS.md), diferenças e limitações verificadas.
 - [Fluxos](./flows/), transformação, execução local e acesso.
 - [DATABRICKS.md](./database/DATABRICKS.md), inventário Bronze, Silver, Gold e segurança.
-- [PENDENCIAS.md](./PENDENCIAS.md), confirmações do responsável.
 
 ## Contribuindo
 
