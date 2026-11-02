@@ -819,6 +819,52 @@
           }
         ]
       }
+    },
+    {
+      "name": "d2895f2f",
+      "displayName": "kpi_admin_demand_by_state",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.gold.kpi_admin_demand_by_state",
+        "dimensions": [
+          {
+            "name": "state",
+            "expr": "state"
+          },
+          {
+            "name": "state_latitude",
+            "expr": "state_latitude"
+          },
+          {
+            "name": "state_longitude",
+            "expr": "state_longitude"
+          },
+          {
+            "name": "registered_local_units",
+            "expr": "registered_local_units"
+          },
+          {
+            "name": "requested_proposals",
+            "expr": "requested_proposals"
+          },
+          {
+            "name": "accepted_proposals",
+            "expr": "accepted_proposals"
+          },
+          {
+            "name": "requested_units",
+            "expr": "requested_units"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Sum of model_count across statuses",
+            "displayName": "Count"
+          }
+        ]
+      }
     }
   ],
   "pages": [
@@ -3778,6 +3824,675 @@
       ],
       "pageType": "PAGE_TYPE_CANVAS",
       "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "page_distributions",
+      "displayName": "Distribuições e filtros",
+      "layout": [
+        {
+          "widget": {
+            "name": "dist_header",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<span style=\"font-size:24px;\"><b>Solaria | Distribuições e filtros</b></span><br><span style=\"font-size:13px;\">Distribuição de preço e disponibilidade das ofertas, com filtros por situação, marca e validade.</span>"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "dist_filter_status",
+            "queries": [
+              {
+                "name": "dist_filter_status_q",
+                "query": {
+                  "datasetName": "71153a2e",
+                  "fields": [
+                    {
+                      "name": "commercial_status",
+                      "expression": "`commercial_status`"
+                    },
+                    {
+                      "name": "commercial_status_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "commercial_status",
+                    "displayName": "Situação comercial",
+                    "queryName": "dist_filter_status_q"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Situação comercial"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "dist_filter_brand",
+            "queries": [
+              {
+                "name": "dist_filter_brand_q",
+                "query": {
+                  "datasetName": "71153a2e",
+                  "fields": [
+                    {
+                      "name": "brand_name",
+                      "expression": "`brand_name`"
+                    },
+                    {
+                      "name": "brand_name_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "brand_name",
+                    "displayName": "Marca",
+                    "queryName": "dist_filter_brand_q"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Marca"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 2,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "dist_filter_expires",
+            "queries": [
+              {
+                "name": "dist_filter_expires_q",
+                "query": {
+                  "datasetName": "71153a2e",
+                  "fields": [
+                    {
+                      "name": "expires_at",
+                      "expression": "`expires_at`"
+                    },
+                    {
+                      "name": "expires_at_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-date-range-picker",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "expires_at",
+                    "displayName": "Validade da oferta",
+                    "queryName": "dist_filter_expires_q"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Validade da oferta"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 2,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "dist_hist_price",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "71153a2e",
+                  "fields": [
+                    {
+                      "name": "bin(unit_price, binWidth=250)",
+                      "expression": "BIN_FLOOR(`unit_price`, 250)"
+                    },
+                    {
+                      "name": "count(*)",
+                      "expression": "COUNT(`*`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "histogram",
+              "encodings": {
+                "x": {
+                  "fieldName": "bin(unit_price, binWidth=250)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Preço unitário (R$, faixas de 250)"
+                },
+                "y": {
+                  "fieldName": "count(*)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Quantidade de ofertas"
+                }
+              },
+              "frame": {
+                "title": "Distribuição do preço unitário das ofertas",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "dist_hist_availability",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "71153a2e",
+                  "fields": [
+                    {
+                      "name": "bin(availability, binWidth=200)",
+                      "expression": "BIN_FLOOR(`availability`, 200)"
+                    },
+                    {
+                      "name": "count(*)",
+                      "expression": "COUNT(`*`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "histogram",
+              "encodings": {
+                "x": {
+                  "fieldName": "bin(availability, binWidth=200)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Disponibilidade (unidades, faixas de 200)"
+                },
+                "y": {
+                  "fieldName": "count(*)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Quantidade de ofertas"
+                }
+              },
+              "frame": {
+                "title": "Distribuição da disponibilidade das ofertas",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 4,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "dist_box_price_brand",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "71153a2e",
+                  "fields": [
+                    {
+                      "name": "brand_name",
+                      "expression": "`brand_name`"
+                    },
+                    {
+                      "name": "min(unit_price)",
+                      "expression": "MIN(`unit_price`)"
+                    },
+                    {
+                      "name": "q1(unit_price)",
+                      "expression": "PERCENTILE(`unit_price`, 0.25)"
+                    },
+                    {
+                      "name": "median(unit_price)",
+                      "expression": "MEDIAN(`unit_price`)"
+                    },
+                    {
+                      "name": "q3(unit_price)",
+                      "expression": "PERCENTILE(`unit_price`, 0.75)"
+                    },
+                    {
+                      "name": "max(unit_price)",
+                      "expression": "MAX(`unit_price`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Preço unitário por marca"
+              },
+              "widgetType": "box",
+              "encodings": {
+                "x": {
+                  "fieldName": "brand_name",
+                  "axis": {
+                    "title": "Marca"
+                  },
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "whiskerStart": {
+                    "fieldName": "min(unit_price)"
+                  },
+                  "boxStart": {
+                    "fieldName": "q1(unit_price)"
+                  },
+                  "boxMid": {
+                    "fieldName": "median(unit_price)"
+                  },
+                  "boxEnd": {
+                    "fieldName": "q3(unit_price)"
+                  },
+                  "whiskerEnd": {
+                    "fieldName": "max(unit_price)"
+                  },
+                  "axis": {
+                    "title": "Preço unitário (R$)"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 10,
+            "width": 12,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "dist_offers_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "71153a2e",
+                  "fields": [
+                    {
+                      "name": "offer_id",
+                      "expression": "`offer_id`"
+                    },
+                    {
+                      "name": "model_name",
+                      "expression": "`model_name`"
+                    },
+                    {
+                      "name": "brand_name",
+                      "expression": "`brand_name`"
+                    },
+                    {
+                      "name": "unit_price",
+                      "expression": "`unit_price`"
+                    },
+                    {
+                      "name": "availability",
+                      "expression": "`availability`"
+                    },
+                    {
+                      "name": "expires_at",
+                      "expression": "`expires_at`"
+                    },
+                    {
+                      "name": "commercial_status",
+                      "expression": "`commercial_status`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Ofertas filtradas"
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "offer_id"
+                  },
+                  {
+                    "fieldName": "model_name"
+                  },
+                  {
+                    "fieldName": "brand_name"
+                  },
+                  {
+                    "fieldName": "unit_price"
+                  },
+                  {
+                    "fieldName": "availability"
+                  },
+                  {
+                    "fieldName": "expires_at"
+                  },
+                  {
+                    "fieldName": "commercial_status"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 17,
+            "width": 12,
+            "height": 8
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
+    },
+    {
+      "name": "page_demand_map",
+      "displayName": "Mapa da demanda",
+      "layout": [
+        {
+          "widget": {
+            "name": "map_header",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<span style=\"font-size:24px;\"><b>Solaria | Mapa da demanda</b></span><br><span style=\"font-size:13px;\">Unidades cadastradas e propostas solicitadas por estado. Cada ponto fica perto do centro da UF e não marca endereços.</span>"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "map_filter_state",
+            "queries": [
+              {
+                "name": "map_filter_state_q",
+                "query": {
+                  "datasetName": "d2895f2f",
+                  "fields": [
+                    {
+                      "name": "state",
+                      "expression": "`state`"
+                    },
+                    {
+                      "name": "state_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "state",
+                    "displayName": "Estado",
+                    "queryName": "map_filter_state_q"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Estado"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "map_state_symbols",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "d2895f2f",
+                  "fields": [
+                    {
+                      "name": "state_latitude",
+                      "expression": "`state_latitude`"
+                    },
+                    {
+                      "name": "state_longitude",
+                      "expression": "`state_longitude`"
+                    },
+                    {
+                      "name": "state",
+                      "expression": "`state`"
+                    },
+                    {
+                      "name": "sum(requested_proposals)",
+                      "expression": "SUM(`requested_proposals`)"
+                    },
+                    {
+                      "name": "sum(registered_local_units)",
+                      "expression": "SUM(`registered_local_units`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "symbol-map",
+              "encodings": {
+                "coordinates": {
+                  "latitude": {
+                    "fieldName": "state_latitude"
+                  },
+                  "longitude": {
+                    "fieldName": "state_longitude"
+                  }
+                },
+                "size": {
+                  "fieldName": "sum(requested_proposals)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Propostas solicitadas"
+                },
+                "color": {
+                  "fieldName": "sum(registered_local_units)",
+                  "scale": {
+                    "type": "quantitative",
+                    "colorRamp": {
+                      "mode": "custom-sequential",
+                      "colors": {
+                        "start": "#FFC64F",
+                        "end": "#B04200"
+                      }
+                    }
+                  },
+                  "displayName": "Unidades cadastradas"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Demanda por estado"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 8,
+            "height": 9
+          }
+        },
+        {
+          "widget": {
+            "name": "map_state_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "d2895f2f",
+                  "fields": [
+                    {
+                      "name": "state",
+                      "expression": "`state`"
+                    },
+                    {
+                      "name": "registered_local_units",
+                      "expression": "`registered_local_units`"
+                    },
+                    {
+                      "name": "requested_proposals",
+                      "expression": "`requested_proposals`"
+                    },
+                    {
+                      "name": "accepted_proposals",
+                      "expression": "`accepted_proposals`"
+                    },
+                    {
+                      "name": "requested_units",
+                      "expression": "`requested_units`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Demanda por estado (tabela)"
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "state"
+                  },
+                  {
+                    "fieldName": "registered_local_units"
+                  },
+                  {
+                    "fieldName": "requested_proposals"
+                  },
+                  {
+                    "fieldName": "accepted_proposals"
+                  },
+                  {
+                    "fieldName": "requested_units"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 4,
+            "width": 4,
+            "height": 9
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
     }
   ],
   "uiSettings": {

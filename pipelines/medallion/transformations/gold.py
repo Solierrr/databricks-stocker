@@ -4,6 +4,7 @@ from pyspark.sql import functions as F
 from databricks.sdk.runtime import spark
 
 from catalog import SECURITY, SILVER, table
+from geography import center_rows
 
 
 # Identificando o filtro de acesso às tabelas de fornecedores.
@@ -37,6 +38,37 @@ def kpi_admin_proposals_by_status():
     return silver("proposals").groupBy("proposal_status").agg(
         F.countDistinct("proposal_id").alias("proposal_count")
     )
+
+
+# Demanda por estado: unidades cadastradas e propostas que as citam, com a coordenada aproximada da UF
+# para o mapa de pontos do painel. Só entram estados com ao menos uma unidade cadastrada.
+def kpi_admin_demand_by_state():
+    located = (silver("local_units").alias("u")
+        .join(silver("addresses").alias("a"), F.col("a.address_id") == F.col("u.address_id"), "inner")
+        .select(F.col("u.local_unit_id").alias("local_unit_id"), F.col("a.state").alias("state")))
+    registered = located.groupBy("state").agg(
+        F.countDistinct("local_unit_id").alias("registered_local_units"))
+    demand = (silver("proposal_units").alias("pu")
+        .join(silver("proposal_items").alias("pi"), F.col("pi.proposal_item_id") == F.col("pu.proposal_item_id"), "inner")
+        .join(silver("proposals").alias("p"), F.col("p.proposal_id") == F.col("pi.proposal_id"), "inner")
+        .join(located.alias("l"), F.col("l.local_unit_id") == F.col("pu.local_unit_id"), "inner")
+        .groupBy(F.col("l.state").alias("state"))
+        .agg(F.countDistinct("p.proposal_id").alias("requested_proposals"),
+             F.countDistinct(F.when(F.col("p.proposal_status") == "ACCEPTED", F.col("p.proposal_id")))
+                 .alias("accepted_proposals"),
+             F.sum("pu.quantity").alias("requested_units")))
+    centers = spark.createDataFrame(
+        center_rows(), "state string, state_latitude double, state_longitude double")
+    return (registered
+        .join(demand, "state", "left")
+        .join(centers, "state", "left")
+        .select(
+            F.col("state"), F.col("state_latitude"), F.col("state_longitude"),
+            F.col("registered_local_units"),
+            F.coalesce(F.col("requested_proposals"), F.lit(0)).alias("requested_proposals"),
+            F.coalesce(F.col("accepted_proposals"), F.lit(0)).alias("accepted_proposals"),
+            F.coalesce(F.col("requested_units"), F.lit(0)).alias("requested_units"),
+        ))
 
 
 # Indicadores de ofertas e estoque por fornecedor.

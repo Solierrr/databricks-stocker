@@ -24,7 +24,7 @@ O produtor publica `gold` com nomes em inglês, que é o contrato de referência
 
 ## Painéis
 
-Há duas definições `.lvdash.json`, a de administração com 19 datasets e a de fornecedor com dez, e as fontes declaradas apontam para `workspace.gold`, enquanto o job declara `analytics`. O README de origem ainda diz que não há painéis, apesar desses arquivos.
+Há duas definições `.lvdash.json`, a de administração com 20 datasets e a de fornecedor com dez, e as fontes declaradas apontam para `workspace.gold`, enquanto o job declara `analytics`. O README de origem ainda diz que não há painéis, apesar desses arquivos.
 
 Não foram instalados jobs, enviados arquivos ou executadas chamadas nesta revisão. O processo comum está em [cópia dos dados para análise](https://github.com/Solierrr/docs-warehouse/blob/main/docs/flows/ANALYTICS_SYNC.md).
 
