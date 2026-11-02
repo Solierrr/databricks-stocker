@@ -164,7 +164,7 @@ def run(args):
                            "timezone": "America/Sao_Paulo", "mode": "local",
                            "decimals": "strings", "supplier_access_filter_applied": False,
                            "inputs": {"fornecedores": str(args.fornecedores), "admins": str(args.admins)}},
-              "tables": {}}
+              "schemas": {}, "tables": {}}
     cached = []
     try:
         with ExitStack() as stack:
@@ -181,6 +181,8 @@ def run(args):
                     rows.sort(key=lambda row: json.dumps(row, sort_keys=True, default=json_value))
                     key = name.removeprefix("local_gold_")
                     result["tables"][key] = rows
+                    # Tipos Spark por coluna: permitem recriar a tabela sem inferir pelo JSON.
+                    result["schemas"][key] = [[name, kind] for name, kind in frame.dtypes]
                     print(f"Gold: {key} ({len(rows)} linhas)", flush=True)
                 else:
                     materialized = frame.cache()
