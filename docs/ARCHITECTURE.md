@@ -8,9 +8,9 @@ Um notebook orquestra módulos PySpark para ingestão manual, normalização e c
 
 ```mermaid
 flowchart LR
-  E[Duas planilhas Excel] --> B[25 tabelas Bronze]
-  B --> S[24 tabelas Silver]
-  S --> G[19 tabelas Gold]
+  E[Duas planilhas Excel] --> B[27 tabelas Bronze]
+  B --> S[26 tabelas Silver]
+  S --> G[26 tabelas Gold]
   G --> D[Definições de painéis]
   G --> X[Task de exportação]
   X -->|HTTP e Bearer de serviço| A[Serviço de sincronização]
@@ -27,7 +27,7 @@ flowchart LR
 | `pipelines/medallion/transformations/medallion.py` | Parâmetros, proteção de substituição e ordem das escritas |
 | `bronze.py` na mesma pasta | Abas, aliases e colunas obrigatórias |
 | `silver.py` na mesma pasta | Projeções, tipos e validação de qualidade |
-| `gold.py` na mesma pasta | Construtores dos 19 indicadores |
+| `gold.py` na mesma pasta | Construtores dos 26 indicadores |
 | `catalog.py` na mesma pasta | Catálogo e schemas |
 | `run_local.py` | Adaptadores Excel, Spark local e saída JSON |
 | `exports/` | Job e notebook que chama a API |
@@ -49,11 +49,11 @@ O repositório não tem API HTTP, OpenAPI nem banco de negócio próprios, e os 
 
 ## Escrita e consistência
 
-O `source_mode` aceita apenas `manual`. A Bronze lê 25 abas, adapta os cabeçalhos antigos e mantém as demais colunas, a Silver valida as fontes antes de escrever as 24 projeções e a Gold calcula 19 tabelas, com substituições tabela a tabela e sem uma transação global entre as três camadas.
+O `source_mode` aceita apenas `manual`. A Bronze lê 27 abas, adapta os cabeçalhos antigos e mantém as demais colunas, a Silver valida as fontes antes de escrever as 24 projeções e a Gold calcula 19 tabelas, com substituições tabela a tabela e sem uma transação global entre as três camadas.
 
 A proteção padrão permite substituir tabelas Delta gerenciadas existentes, mas recusa views e objetos de outro formato. `allow_replace_existing` remove explicitamente essa barreira. O parâmetro falso não significa proibir toda substituição.
 
-As dez tabelas de fornecedor recebem row filter na própria criação, e as outras nove não recebem essa política no escritor. O mapa de acesso começa vazio e exige provisionamento, e um filtro visual no painel não isola os usuários.
+As quinze tabelas de fornecedor recebem row filter na própria criação, e as outras onze não recebem essa política no escritor. O mapa de acesso começa vazio e exige provisionamento, e um filtro visual no painel não isola os usuários.
 
 ## Execução local
 

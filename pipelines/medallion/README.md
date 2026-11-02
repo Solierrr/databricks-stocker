@@ -2,8 +2,8 @@
 
 `transformations/medallion.py` é o notebook de transformação. Ele chama
 `bronze.py`, `silver.py` e `gold.py` na ordem e grava tabelas
-Delta gerenciadas comuns, com os mesmos nomes das antigas views: 25 Bronze,
-24 Silver e 19 Gold. Os KPIs continuam em PySpark; somente a criação das dez
+Delta gerenciadas comuns, com os mesmos nomes das antigas views: 27 Bronze,
+26 Silver e 26 Gold. Os KPIs continuam em PySpark; somente a criação das quinze
 tabelas Gold de fornecedor usa DDL SQL para aplicar o row filter. Não há três
 pipelines, nem uma Lakeflow Declarative Pipeline ativa nesta pasta.
 
@@ -26,11 +26,11 @@ Bronze. Falta de aba ou coluna causa falha explícita.
 
 | Arquivo | Abas |
 |---|---|
-| `fornecedores.xlsx` | `brand`, `model`, `supplier`, `offer`, `inventory`, `proposal`, `proposal_item` |
+| `fornecedores.xlsx` | `brand`, `model`, `supplier`, `offer`, `inventory`, `proposal`, `proposal_item`, `purchase_order`, `order_item` |
 | `admins.xlsx` | `company`, `person`, `requester`, `technician`, `technician_affiliation`, `user_company`, `proposal_unit`, `local_unit`, `professional_review`, `project_activity`, `service_contract`, `service_executor`, `technical_project`, `technical_service`, `charge`, `company_plan`, `subscription`, `energy_bill` |
 
 As 18 abas de admins incluem as fontes de demandante e profissional para
-preservar os 19 KPIs. As 7 abas de fornecedores incluem relações compartilhadas
+preservar os 26 KPIs. As 9 abas de fornecedores incluem relações compartilhadas
 com KPIs administrativos. IDs e FKs devem ser coerentes entre abas. Formate
 UUIDs como texto; datas, números e booleanos podem vir como texto se seus valores
 forem conversíveis. A Silver valida as colunas, os IDs e essas conversões antes

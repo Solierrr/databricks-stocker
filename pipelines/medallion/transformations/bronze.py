@@ -18,6 +18,8 @@ SHEETS = {
         "inventory": ("id", "supplier_id", "model_id", "quantity"),
         "proposal": ("id", "requester_id", "supplier_id", "status", "total_amount", "created_at", "updated_at"),
         "proposal_item": ("id", "proposal_id", "offer_id", "quantity", "negotiated_unit_price", "discount"),
+        "purchase_order": ("id", "buyer_user_id", "status", "subtotal_amount", "fee_percentage", "fee_amount", "total_amount", "created_at", "canceled_at"),
+        "order_item": ("id", "purchase_order_id", "offer_id", "supplier_id", "offer_slug", "model_name", "unit_price", "discount_percentage", "net_unit_price", "quantity", "line_total_amount", "created_at"),
     },
     "admins": {
         "company": ("id", "type", "status", "trade_name", "corporate_name", "slug"),
