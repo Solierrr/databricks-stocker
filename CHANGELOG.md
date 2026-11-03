@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.9.0](https://github.com/Solierrr/databricks-stocker/compare/v0.8.0...v0.9.0) (2026-11-02)
+
+
+### Features
+
+* add filters, distributions and a demand map to the dashboards ([#30](https://github.com/Solierrr/databricks-stocker/issues/30)) ([ffe0dee](https://github.com/Solierrr/databricks-stocker/commit/ffe0dee90605536ce1b210020ed3c4843c520e93))
+* add orders and subscriptions to the gold layer ([#29](https://github.com/Solierrr/databricks-stocker/issues/29)) ([5045b31](https://github.com/Solierrr/databricks-stocker/commit/5045b313417881bc050c25c5616865b266c1a9ab))
+* local gold kpi export ([#24](https://github.com/Solierrr/databricks-stocker/issues/24)) ([4b1ce02](https://github.com/Solierrr/databricks-stocker/commit/4b1ce020e6df0aceaedafb2ffb626c7fd6daaeae))
+* silver data quality ([#23](https://github.com/Solierrr/databricks-stocker/issues/23)) ([433d89e](https://github.com/Solierrr/databricks-stocker/commit/433d89ee8525ac5e87351638e2c60a2529aa7170))
+* uploading theme and renaming dash ([#20](https://github.com/Solierrr/databricks-stocker/issues/20)) ([6879055](https://github.com/Solierrr/databricks-stocker/commit/687905589c648df53c9c993013c17e58143f9bb0))
+* write the column types in the local gold json ([#27](https://github.com/Solierrr/databricks-stocker/issues/27)) ([86b3998](https://github.com/Solierrr/databricks-stocker/commit/86b3998a211ca5bd54728bac10b36d7d9626152f))
+
+
+### Bug Fixes
+
+* dash de admins duplicado ([#22](https://github.com/Solierrr/databricks-stocker/issues/22)) ([f229dbd](https://github.com/Solierrr/databricks-stocker/commit/f229dbd2bef7a58b661c37b0928db4f8b0f34beb))
+
 ## [0.8.0](https://github.com/Solierrr/databricks-stocker/compare/v0.7.0...v0.8.0) (2026-10-26)
 
 
